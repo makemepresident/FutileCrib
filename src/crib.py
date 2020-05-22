@@ -42,6 +42,10 @@ class Player:
         self.name = name
         self.hand = []
         self.crib = []
+        self.position = 0
+
+    def changePosition(self, points):
+        self.position += points
 
     def getHand(self):
         string_hand = []
@@ -72,10 +76,16 @@ class Player:
 class GameHandler:
 
     def __init__(self, player1, player2):
+        self.running = True
         self.deck = Deck()
         self.players = [Player('one'), Player('two')]
-        dealer = math.floor(random())
-        self.dealer = self.players[math.floor(random())]
+        self.who_deals = 0
+        self.dealer = self.players[who_deals]
+
+    def resetGame(self):
+        self.deck = Deck()
+        self.who_deals = (self.who_deals + 1) % 2
+        self.players[self.who_deals]
 
     def playerOne(self):
         return self.players[0]
@@ -100,7 +110,8 @@ class GameHandler:
                 print('Player ' + str(p) + ', send a card to the crib - ')
                 self.dealer.crib.append(self.players[p].removeFromHand(int(input())))
 
-g = GameHandler('derik', 'lorby')
-g.dealHands()
-x = g.cutCard()
-print(str(x.value) + ' of ' + str(x.suit))
+    def gameLoop(self):
+        while(self.running):
+            self.dealHands()
+            self.cribCall()
+            
