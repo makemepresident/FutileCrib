@@ -124,9 +124,47 @@ class GameHandler:
                 last = self.players[(self.who_deals + 1) % 2]
                 if len(first.hand):
                     first.removeFromHand(input('Choose a card to play: '))
+                    # Check to see if any point are gained in pegging
                 if len(last.hand):
                     last.removeFromHand(input('Choose a card to play'))
+                    # Check to see if any point are gained in pegging
             print('counting starts now')
+            # Use Points object (not created yet) in order to calculate the maximum number of points
+            # Allow the non-dealer to enter the number of points they think they received
+            # if points_input < calculated_points, add points to tally, if points_input > calculated_points
+            # force another input (rather than maximize points as could be abused mechanic)
+            self.resetGame()
+
+class Points:
+
+    def __init__(self, hand):
+        self.hands = [] # Contains every possible hand
+        for temp in self.powerset(hand):
+            if len(hand) is 4:
+                hands.append(hand)
+
+    def countFifteen(self):
+        self.corr_points = []
+        for i in range(len(hands)):
+            fifteen_count = 0
+            for j in self.powerset(hands[i]):
+                if sum(j) is 15:
+                    fifteen_count += 1
+            self.corr_points.append(fifteen_count)
+
+    def checkRun(self, hand):
+        for i in range(len(hand)):
+            
+
+    def checkMatches(self):
+
+    def powerset(s):
+        x = len(s)
+        masks = [1 << i for i in range(x)]
+        for i in range(1 << x):
+            yield [ss for mask, ss in zip(masks, s) if i & mask]
+
+    
 
 g = GameHandler('Derik', 'Ryan')            
 g.gameLoop()
