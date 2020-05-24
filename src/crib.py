@@ -70,7 +70,9 @@ class Player:
             self.hand.append(card)
 
     def removeFromHand(self, index):
-        index -= 1
+        index = int(index) - 1
+        if index > len(self.hand) - 1:
+            index = len(self.hand) - 1
         return self.hand.pop(index)
 
 class GameHandler:
@@ -78,9 +80,9 @@ class GameHandler:
     def __init__(self, player1, player2):
         self.running = True
         self.deck = Deck()
-        self.players = [Player('one'), Player('two')]
+        self.players = [Player(player1), Player(player2)]
         self.who_deals = 0
-        self.dealer = self.players[who_deals]
+        self.dealer = self.players[self.who_deals]
 
     def resetGame(self):
         self.deck = Deck()
@@ -107,11 +109,24 @@ class GameHandler:
     def cribCall(self):
         for p in range(len(self.players)):
             for i in range(2):
+                print(self.players[p].getHand())
                 print('Player ' + str(p) + ', send a card to the crib - ')
                 self.dealer.crib.append(self.players[p].removeFromHand(int(input())))
 
     def gameLoop(self):
         while(self.running):
+            self.deck.shuffle()
             self.dealHands()
             self.cribCall()
-            
+            cut = self.cutCard()
+            while len(self.playerOne().hand) and len(self.playerTwo().hand): # While any player has a card(s) in their hand
+                first = self.players[self.who_deals]
+                last = self.players[(self.who_deals + 1) % 2]
+                if len(first.hand):
+                    first.removeFromHand(input('Choose a card to play: '))
+                if len(last.hand):
+                    last.removeFromHand(input('Choose a card to play'))
+            print('counting starts now')
+
+g = GameHandler('Derik', 'Ryan')            
+g.gameLoop()
