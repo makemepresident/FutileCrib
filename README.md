@@ -10,3 +10,4 @@ Python-based game of cribbage with AI opponent (and hopefully a NN opponent)
 * Created first iteration of game loop with a "functioning" pegging round
 * Added structure for Points class that will be used to determine if points are gained
 * Partially fleshed out Points class to provide handling for counting fifteen(s)
+* Added partial handing for counting runs in Points class

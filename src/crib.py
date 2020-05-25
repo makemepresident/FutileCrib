@@ -118,7 +118,7 @@ class GameHandler:
             self.deck.shuffle()
             self.dealHands()
             self.cribCall()
-            cut = self.cutCard()
+            self.cut = self.cutCard()
             while len(self.playerOne().hand) and len(self.playerTwo().hand): # While any player has a card(s) in their hand
                 first = self.players[self.who_deals]
                 last = self.players[(self.who_deals + 1) % 2]
@@ -137,34 +137,57 @@ class GameHandler:
 
 class Points:
 
-    def __init__(self, hand):
+    def __init__(self, hand, cut_card):
         self.hands = [] # Contains every possible hand
+        self.cut = cut_card
         for temp in self.powerset(hand):
-            if len(hand) is 4:
+            if len(hand) == 4:
                 hands.append(hand)
 
-    def countFifteen(self):
-        self.corr_points = []
-        for i in range(len(hands)):
-            fifteen_count = 0
-            for j in self.powerset(hands[i]):
-                if sum(j) is 15:
-                    fifteen_count += 1
-            self.corr_points.append(fifteen_count)
+    def countFifteen(self, hand):
+        num_of = 0
+        runs = 0
+        if 11 or 12 or 13 in hand:
+            temp_hand = [x if x < 11 else 10 for x in hand]
+        temp_hand.append(self.cut.value)
+        for i in self.powerset(temp_hand):
+            if sum(i) == 15:
+                num_of += 1
+            if len(i) >= 3:
+                print(i)
+                if self.checkRun(i) == 3:
+                    runs += self.checkRun(i)
+                elif self.checkRun(i) == 4:
+                    runs += 1
+        return num_of * 2, runs
 
     def checkRun(self, hand):
+        run = 0
+        hand.append(self.cut.value)
         for i in range(len(hand)):
-            
+            if hand[i] + 1 in hand:
+                if hand[i] + 2 in hand:
+                    run = 3
+                    if hand[i] + 3 in hand:
+                        run = 4
+        return run
 
-    def checkMatches(self):
+    def checkMatches(self, hand):
 
-    def powerset(s):
+        return
+
+    def powerset(self, s):
         x = len(s)
         masks = [1 << i for i in range(x)]
         for i in range(1 << x):
             yield [ss for mask, ss in zip(masks, s) if i & mask]
 
-    
+th = [7,8,8,9]
+p = Points([10,11,5,10,8,9], Card('Spade', 4))
+x = p.countFifteen(th)
+print(x[0])
+print(x[1])
 
-g = GameHandler('Derik', 'Ryan')            
-g.gameLoop()
+  
+# g = GameHandler('Derik', 'Ryan')            
+# g.gameLoop()
