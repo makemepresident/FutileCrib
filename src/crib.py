@@ -138,11 +138,11 @@ class GameHandler:
 class Points:
 
     def __init__(self, hand, cut_card):
-        self.hands = [] # Contains every possible hand
+        self.hands = [] # Contains every possible hand [1,2,3,4,5,6] --> [],[1],[2]...[1,2,3],[2,3,4],[2,3,5]... [1,2,3,4]
         self.cut = cut_card
         for temp in self.powerset(hand):
-            if len(hand) == 4:
-                hands.append(hand)
+            if len(temp) == 4:
+                hands.append(temp)
 
     def countFifteen(self, hand):
         num_of = 0
@@ -154,7 +154,7 @@ class Points:
             if sum(i) == 15:
                 num_of += 1
             if len(i) >= 3:
-                print(i)
+                # print(i)
                 if self.checkRun(i) == 3:
                     runs += self.checkRun(i)
                 elif self.checkRun(i) == 4:
@@ -163,13 +163,15 @@ class Points:
 
     def checkRun(self, hand):
         run = 0
-        hand.append(self.cut.value)
+        temp_hand = hand
+        temp_hand.append(self.cut.value)
         for i in range(len(hand)):
             if hand[i] + 1 in hand:
                 if hand[i] + 2 in hand:
+                    print(temp_hand)
                     run = 3
                     if hand[i] + 3 in hand:
-                        run = 4
+                        run += 4
         return run
 
     def checkMatches(self, hand):
