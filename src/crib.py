@@ -6,9 +6,16 @@ class Card:
     # Could hold colour information
     # Could hold image information
 
+    card_values = {
+        'J': 11,
+        'Q': 12,
+        'K': 13,
+    }
+
     def __init__(self, suit, value):
         self.suit = suit
-        value += 1
+        if value == 0:
+            value == 1
         if value < 11:
             self.value = value
         elif value == 11:
@@ -17,6 +24,9 @@ class Card:
             self.value = 'Q'
         elif value == 13:
             self.value = 'K'
+
+    def getValue(self):
+        return self.value if self.value not in self.card_values else self.card_values.get(self.value)
     
 class Deck:
 
@@ -78,6 +88,7 @@ class Player:
 class GameHandler:
 
     def __init__(self, player1, player2):
+        self.peg = 0
         self.running = True
         self.deck = Deck()
         self.players = [Player(player1), Player(player2)]
@@ -123,11 +134,12 @@ class GameHandler:
                 first = self.players[self.who_deals]
                 last = self.players[(self.who_deals + 1) % 2]
                 if len(first.hand):
-                    first.removeFromHand(input('Choose a card to play: '))
+                    choice = first.removeFromHand(input('Choose a card to play: '))
                     # Check to see if any point are gained in pegging
                 if len(last.hand):
                     last.removeFromHand(input('Choose a card to play'))
                     # Check to see if any point are gained in pegging
+            # Needs handling for resetting "board"
             print('counting starts now')
             # Use Points object (not created yet) in order to calculate the maximum number of points
             # Allow the non-dealer to enter the number of points they think they received
@@ -140,36 +152,33 @@ class Points:
     def __init__(self, hand, cut_card):
         self.hands = [] # Contains every possible hand [1,2,3,4,5,6] --> [],[1],[2]...[1,2,3],[2,3,4],[2,3,5]... [1,2,3,4]
         self.cut = cut_card
-        for temp in self.powerset(hand):
-            if len(temp) == 4:
-                hands.append(temp)
+        if hand is not None:
+            for temp in self.powerset(hand):
+                if len(temp) == 4:
+                    self.hands.append(temp)
 
-    def countFifteen(self, hand):
-        num_of = 0
+    def count(self, hand):
+        fifteens = 0
         runs = 0
+        pairs = 0
         if 11 or 12 or 13 in hand:
             temp_hand = [x if x < 11 else 10 for x in hand]
-        temp_hand.append(self.cut.value)
+        temp_hand.append(self.cut.getValue())
         for i in self.powerset(temp_hand):
+            print(i)
             if sum(i) == 15:
-                num_of += 1
-            if len(i) >= 3:
-                # print(i)
-                if self.checkRun(i) == 3:
-                    runs += self.checkRun(i)
-                elif self.checkRun(i) == 4:
-                    runs += 1
-        return num_of * 2, runs
+                fifteens += 1
+            if len(i) == 2 and i[0] == i[1]:
+                pairs += 1
+        return fifteens * 2, runs, pairs * 2
 
     def checkRun(self, hand):
         run = 0
-        temp_hand = hand
-        temp_hand.append(self.cut.value)
         for i in range(len(hand)):
             if hand[i] + 1 in hand:
                 if hand[i] + 2 in hand:
-                    print(temp_hand)
-                    run = 3
+                    # print(temp_hand)
+                    run += 3
                     if hand[i] + 3 in hand:
                         run += 4
         return run
@@ -185,10 +194,12 @@ class Points:
             yield [ss for mask, ss in zip(masks, s) if i & mask]
 
 th = [7,8,8,9]
-p = Points([10,11,5,10,8,9], Card('Spade', 4))
-x = p.countFifteen(th)
+p = Points(None, Card('Spade', 11))
+x = p.count(th)
 print(x[0])
 print(x[1])
+print(x[2])
+print(p.cut.getValue())
 
   
 # g = GameHandler('Derik', 'Ryan')            
