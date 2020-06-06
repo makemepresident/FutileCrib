@@ -165,22 +165,25 @@ class Points:
             temp_hand = [x if x < 11 else 10 for x in hand]
         temp_hand.append(self.cut.getValue())
         for i in self.powerset(temp_hand):
-            print(i)
             if sum(i) == 15:
                 fifteens += 1
             if len(i) == 2 and i[0] == i[1]:
                 pairs += 1
+            if len(i) >= 3:
+                runs += self.checkRun(i)
         return fifteens * 2, runs, pairs * 2
 
     def checkRun(self, hand):
         run = 0
         for i in range(len(hand)):
-            if hand[i] + 1 in hand:
-                if hand[i] + 2 in hand:
-                    # print(temp_hand)
-                    run += 3
-                    if hand[i] + 3 in hand:
-                        run += 4
+            temp = [hand[i] + j for j in range(len(hand))]
+            for j in range(len(temp)):
+                if temp[j] not in hand:
+                    break
+                run += len(temp)
+        print('run is ' + str(run) + ' points')
+        print(hand)
+        print()
         return run
 
     def checkMatches(self, hand):
