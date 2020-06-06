@@ -176,14 +176,16 @@ class Points:
     def checkRun(self, hand):
         run = 0
         for i in range(len(hand)):
-            temp = [hand[i] + j for j in range(len(hand))]
+            temp = [hand[i] + j for j in range(1, len(hand))]
+            # print(hand)
+            # print(temp)
             for j in range(len(temp)):
                 if temp[j] not in hand:
                     break
-                run += len(temp)
-        print('run is ' + str(run) + ' points')
-        print(hand)
-        print()
+                if j == len(temp) - 1:
+                    run = len(hand)
+        # print('run is ' + str(run) + ' points')
+        # print()
         return run
 
     def checkMatches(self, hand):
@@ -197,12 +199,11 @@ class Points:
             yield [ss for mask, ss in zip(masks, s) if i & mask]
 
 th = [7,8,8,9]
-p = Points(None, Card('Spade', 11))
+p = Points(None, Card('Spade', 10))
 x = p.count(th)
 print(x[0])
 print(x[1])
 print(x[2])
-print(p.cut.getValue())
 
   
 # g = GameHandler('Derik', 'Ryan')            
