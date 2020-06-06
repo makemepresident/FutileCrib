@@ -135,9 +135,11 @@ class GameHandler:
                 last = self.players[(self.who_deals + 1) % 2]
                 if len(first.hand):
                     choice = first.removeFromHand(input('Choose a card to play: '))
+                    self.lastCard = choice
                     # Check to see if any point are gained in pegging
                 if len(last.hand):
-                    last.removeFromHand(input('Choose a card to play'))
+                    choice = last.removeFromHand(input('Choose a card to play'))
+                    self.lastCard = choice
                     # Check to see if any point are gained in pegging
             # Needs handling for resetting "board"
             print('counting starts now')
@@ -152,12 +154,20 @@ class Points:
     def __init__(self, hand, cut_card):
         self.hands = [] # Contains every possible hand [1,2,3,4,5,6] --> [],[1],[2]...[1,2,3],[2,3,4],[2,3,5]... [1,2,3,4]
         self.cut = cut_card
+        self.peg = 0 # heh
         if hand is not None:
             for temp in self.powerset(hand):
                 if len(temp) == 4:
                     self.hands.append(temp)
 
-    def count(self, hand):
+    def checkPeg(self, value):
+        position = 0
+        fin = self.peg + value
+        if fin < 32:
+            if fin == 15 or fin == 31:
+                position += 2
+
+    def countHand(self, hand):
         fifteens = 0
         runs = 0
         pairs = 0
@@ -177,20 +187,18 @@ class Points:
         run = 0
         for i in range(len(hand)):
             temp = [hand[i] + j for j in range(1, len(hand))]
-            # print(hand)
-            # print(temp)
             for j in range(len(temp)):
                 if temp[j] not in hand:
                     break
                 if j == len(temp) - 1:
-                    run = len(hand)
-        # print('run is ' + str(run) + ' points')
-        # print()
+                    # print(hand)
+                    if len(hand) > 3:
+                        run += len(hand) - 6
+                        if len(hand) == 5:
+                            run += 1
+                    else:
+                        run += 3
         return run
-
-    def checkMatches(self, hand):
-
-        return
 
     def powerset(self, s):
         x = len(s)
@@ -198,12 +206,14 @@ class Points:
         for i in range(1 << x):
             yield [ss for mask, ss in zip(masks, s) if i & mask]
 
-th = [7,8,8,9]
-p = Points(None, Card('Spade', 10))
-x = p.count(th)
-print(x[0])
-print(x[1])
-print(x[2])
+th = [4,5,5,6]
+p = Points(None, Card('Spade', 5))
+
+x = p.countHand(th)
+print('For the hand ' + str(th) + ':')
+print(str(x[0]) + ' points in 15s')
+print(str(x[1]) + ' points in runs')
+print(str(x[2]) + ' points in pairs')
 
   
 # g = GameHandler('Derik', 'Ryan')            
