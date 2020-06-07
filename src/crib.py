@@ -51,7 +51,6 @@ class Player:
     def __init__(self, name):
         self.name = name
         self.hand = []
-        self.crib = []
         self.position = 0
 
     def changePosition(self, points):
@@ -80,92 +79,67 @@ class Player:
             self.hand.append(card)
 
     def removeFromHand(self, index):
+        if index == 'go':
+            return 'g'
+        if index == 0:
+            index = 1
         index = int(index) - 1
         if index > len(self.hand) - 1:
             index = len(self.hand) - 1
         return self.hand.pop(index)
 
+    def handIsEmpty(self):
+        if len(hand) == 0:
+            return True
+        return False
+
 class GameHandler:
 
     def __init__(self, player1, player2):
-        self.peg = 0
-        self.running = True
-        self.deck = Deck()
-        self.players = [Player(player1), Player(player2)]
-        self.who_deals = 0
-        self.dealer = self.players[self.who_deals]
-
-    def resetGame(self):
-        self.deck = Deck()
-        self.who_deals = (self.who_deals + 1) % 2
-        self.players[self.who_deals]
-
-    def playerOne(self):
-        return self.players[0]
-
-    def playerTwo(self):
-        return self.players[1]
-        
-    def dealHands(self):
-        for p in range(2):
-            for i in range(6):
-                self.players[p].addToHand(self.deck.drawCard())
-    
-    def cutCard(self):
-        return self.deck.drawCard()
-
-    def generateRandom(self):
-        return math.floor(random() * 52) - (52 % len(self.deck))
-
-    def cribCall(self):
-        for p in range(len(self.players)):
-            for i in range(2):
-                print(self.players[p].getHand())
-                print('Player ' + str(p) + ', send a card to the crib - ')
-                self.dealer.crib.append(self.players[p].removeFromHand(int(input())))
+        if not isinstance(player1, Player) and not isinstance(player2, Player):
+            return
+        else:
+            self.turn = 0
+            self.deck = Deck('p1', 'p2')
+            self.cut_card = None
+            self.peg_count = 0
+            self.players = [player1, player2]
+            self.dealer = turn % len(players)
+            self.crib = []
+            self.running = True
 
     def gameLoop(self):
-        while(self.running):
-            self.deck.shuffle()
-            self.dealHands()
+        while self.running:
+            # self.deck.shuffle()
             self.cribCall()
-            self.cut = self.cutCard()
-            while len(self.playerOne().hand) and len(self.playerTwo().hand): # While any player has a card(s) in their hand
-                first = self.players[self.who_deals]
-                last = self.players[(self.who_deals + 1) % 2]
-                if len(first.hand):
-                    choice = first.removeFromHand(input('Choose a card to play: '))
-                    self.lastCard = choice
-                    # Check to see if any point are gained in pegging
-                if len(last.hand):
-                    choice = last.removeFromHand(input('Choose a card to play'))
-                    self.lastCard = choice
-                    # Check to see if any point are gained in pegging
-            # Needs handling for resetting "board"
-            print('counting starts now')
-            # Use Points object (not created yet) in order to calculate the maximum number of points
-            # Allow the non-dealer to enter the number of points they think they received
-            # if points_input < calculated_points, add points to tally, if points_input > calculated_points
-            # force another input (rather than maximize points as could be abused mechanic)
-            self.resetGame()
+            self.cut_card = self.deck.drawCard()
+            # while not players[0].handIsEmpty() and not players[1].handIsEmpty():
+                # PEGGING
+            return
+
+    def takeTurn(self, player):
+        choice = player.removeFromHand(input('Choose a card'))
+        while choice + self.peg_count > 31:
+            choice = player.removeFromHand(input('Choose another card idot'))
+        return choice
+
+    def cribCall(self):
+        for i in range(len(self.players)):
+            for j in range(2):
+                if j == 0:
+                    self.players[i].removeFromHand(input('Choose a card to send to the crib'))
+                else:
+                    self.players[i].removeFromHand(input('Choose another card to send to the crib'))
 
 class Points:
 
     def __init__(self, hand, cut_card):
         self.hands = [] # Contains every possible hand [1,2,3,4,5,6] --> [],[1],[2]...[1,2,3],[2,3,4],[2,3,5]... [1,2,3,4]
         self.cut = cut_card
-        self.peg = 0 # heh
         if hand is not None:
             for temp in self.powerset(hand):
                 if len(temp) == 4:
                     self.hands.append(temp)
-
-    def checkPeg(self, value):
-        position = 0
-        fin = self.peg + value
-        if fin < 32:
-            if fin == 15 or fin == 31:
-                position += 2
 
     def countHand(self, hand):
         fifteens = 0
