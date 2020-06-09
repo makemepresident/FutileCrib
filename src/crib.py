@@ -111,20 +111,28 @@ class GameHandler:
 
     def gameLoop(self):
         while self.running:
-            # self.deck.shuffle()
+            self.deck.shuffle()
+            self.dealHands()
             self.cribCall()
             self.cut_card = self.deck.drawCard()
+            count = 0
             while not self.players[0].handIsEmpty() and not self.players[1].handIsEmpty():
-                count = 0
                 for i in range(len(self.players)):
                     choice = self.takeTurn(self.players[(self.dealer + i) % 2])
                     if choice == 'go':
                         count = 0
                         continue
-                    count += choice
+                    count += choice.getValue()
+                    print('Current peg count: ' + str(count))
+                    print()
                 # PEGGING
         # count now
         self.nextTurn()
+
+    def dealHands(self):
+        for p in range(2):
+            for i in range(6):
+                self.players[p].addToHand(self.deck.drawCard())
 
     def nextTurn(self):
         self.turn += 1
@@ -135,18 +143,29 @@ class GameHandler:
         self.crib = []
 
     def takeTurn(self, player):
-        choice = player.removeFromHand(input('Choose a card'))
-        while choice + self.peg_count > 31:
-            choice = player.removeFromHand(input('Choose another card idot'))
+        print(player.getHand())
+        # needs a non destructive check for while boolean condition
+        choice = player.removeFromHand(input('Choose a card: '))
+        print()
+        while choice.getValue() + self.peg_count > 31:
+            temp = input('Exceeds 31 - choose another card: ')
+            print()
+            if temp != 'go':
+                choice = player.removeFromHand(temp)
+            else:
+                choice = 'go'
         return choice
 
     def cribCall(self):
         for i in range(len(self.players)):
             for j in range(2):
+                print(self.players[i].getHand())
                 if j == 0:
-                    self.players[i].removeFromHand(input('Choose a card to send to the crib'))
+                    self.players[i].removeFromHand(input('Choose a card to send to the crib: '))
+                    print()
                 else:
-                    self.players[i].removeFromHand(input('Choose another card to send to the crib'))
+                    self.players[i].removeFromHand(input('Choose another card to send to the crib: '))
+                    print()
 
 class Points:
 
