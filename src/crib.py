@@ -89,22 +89,23 @@ class Player:
         return self.hand.pop(index)
 
     def handIsEmpty(self):
-        if len(hand) == 0:
+        if len(self.hand) == 0:
             return True
         return False
 
 class GameHandler:
 
     def __init__(self, player1, player2):
-        if not isinstance(player1, Player) and not isinstance(player2, Player):
+        if type(player1) != str and type(player2) != str:
+            print('Cannot initialize...')
             return
         else:
             self.turn = 0
-            self.deck = Deck('p1', 'p2')
+            self.deck = Deck()
             self.cut_card = None
             self.peg_count = 0
-            self.players = [player1, player2]
-            self.dealer = turn % len(players)
+            self.players = [Player(player1), Player(player2)]
+            self.dealer = self.turn % len(self.players)
             self.crib = []
             self.running = True
 
@@ -113,9 +114,25 @@ class GameHandler:
             # self.deck.shuffle()
             self.cribCall()
             self.cut_card = self.deck.drawCard()
-            # while not players[0].handIsEmpty() and not players[1].handIsEmpty():
+            while not self.players[0].handIsEmpty() and not self.players[1].handIsEmpty():
+                count = 0
+                for i in range(len(self.players)):
+                    choice = self.takeTurn(self.players[(self.dealer + i) % 2])
+                    if choice == 'go':
+                        count = 0
+                        continue
+                    count += choice
                 # PEGGING
-            return
+        # count now
+        self.nextTurn()
+
+    def nextTurn(self):
+        self.turn += 1
+        self.deck = Deck()
+        self.cut_card = None
+        self.peg_count = 0
+        self.dealer = self.turn % len(self.players)
+        self.crib = []
 
     def takeTurn(self, player):
         choice = player.removeFromHand(input('Choose a card'))
@@ -179,16 +196,6 @@ class Points:
         masks = [1 << i for i in range(x)]
         for i in range(1 << x):
             yield [ss for mask, ss in zip(masks, s) if i & mask]
-
-th = [4,5,5,6]
-p = Points(None, Card('Spade', 5))
-
-x = p.countHand(th)
-print('For the hand ' + str(th) + ':')
-print(str(x[0]) + ' points in 15s')
-print(str(x[1]) + ' points in runs')
-print(str(x[2]) + ' points in pairs')
-
   
-# g = GameHandler('Derik', 'Ryan')            
-# g.gameLoop()
+g = GameHandler('Derik', 'Ryan')            
+g.gameLoop()
