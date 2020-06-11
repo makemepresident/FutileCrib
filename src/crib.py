@@ -78,7 +78,7 @@ class Player:
         if isinstance(card, Card):
             self.hand.append(card)
 
-    def removeFromHand(self, index):
+    def removeFromHand(self, index, destructive):
         if index == 'go':
             return 'g'
         if index == 0:
@@ -86,7 +86,9 @@ class Player:
         index = int(index) - 1
         if index > len(self.hand) - 1:
             index = len(self.hand) - 1
-        return self.hand.pop(index)
+        if destructive:
+            return self.hand.pop(index)
+        return self.hand[index]
 
     def handIsEmpty(self):
         if len(self.hand) == 0:
@@ -115,15 +117,14 @@ class GameHandler:
             self.dealHands()
             self.cribCall()
             self.cut_card = self.deck.drawCard()
-            count = 0
             while not self.players[0].handIsEmpty() and not self.players[1].handIsEmpty():
                 for i in range(len(self.players)):
                     choice = self.takeTurn(self.players[(self.dealer + i) % 2])
-                    if choice == 'go':
-                        count = 0
-                        continue
-                    count += choice.getValue()
-                    print('Current peg count: ' + str(count))
+                    # if choice == 'go':
+                    #     self.peg_count = 0
+                    #     continue      THIS SHOULD BE HANDLED IN TAKETURN METHOD
+                    self.peg_count += choice.getValue()
+                    print('Current peg count: ' + str(self.peg_count))
                     print()
                 # PEGGING
         # count now
@@ -145,10 +146,15 @@ class GameHandler:
     def takeTurn(self, player):
         print(player.getHand())
         # needs a non destructive check for while boolean condition
-        choice = player.removeFromHand(input('Choose a card: '))
+        choice = input('Choose a card: ')
+        if choice == 'go':
+            temp_card = 'go'
+        else:
+            temp_card = player.removeFromHand(choice)
         print()
-        while choice.getValue() + self.peg_count > 31:
-            temp = input('Exceeds 31 - choose another card: ')
+        while temp_card.getValue() + self.peg_count > 31:
+            choice = input('Exceeds 31 - choose another card: ')
+            temp_card = player.removeFromHand(choice)
             print()
             if temp != 'go':
                 choice = player.removeFromHand(temp)
