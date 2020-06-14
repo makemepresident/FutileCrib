@@ -79,10 +79,6 @@ class Player:
             self.hand.append(card)
 
     def removeFromHand(self, index, destructive):
-        if index == 'go':
-            return 'g'
-        if index == 0:
-            index = 1
         index = int(index) - 1
         if index > len(self.hand) - 1:
             index = len(self.hand) - 1
@@ -117,18 +113,20 @@ class GameHandler:
             self.dealHands()
             self.cribCall()
             self.cut_card = self.deck.drawCard()
-            while not self.players[0].handIsEmpty() and not self.players[1].handIsEmpty():
-                for i in range(len(self.players)):
-                    choice = self.takeTurn(self.players[(self.dealer + i) % 2])
-                    # if choice == 'go':
-                    #     self.peg_count = 0
-                    #     continue      THIS SHOULD BE HANDLED IN TAKETURN METHOD
-                    self.peg_count += choice.getValue()
-                    print('Current peg count: ' + str(self.peg_count))
-                    print()
-                # PEGGING
-        # count now
-        self.nextTurn()
+            self.peggingRound()
+            # count now
+            self.nextTurn()
+
+    def peggingRound(self):
+        while not self.players[0].handIsEmpty() and not self.players[1].handIsEmpty(): # Either player has cards
+            for i in range(len(self.players)):
+                played = self.takeTurn(self.players[(self.dealer + i) % 2])
+                if played == 0:
+                    self.peg_count = 0
+                    continue
+                self.peg_count += played.getValue()
+                print('Current peg count: ' + str(self.peg_count))
+                print()
 
     def dealHands(self):
         for p in range(2):
@@ -145,32 +143,36 @@ class GameHandler:
 
     def takeTurn(self, player):
         print(player.getHand())
-        # needs a non destructive check for while boolean condition
         choice = input('Choose a card: ')
-        if choice == 'go':
-            temp_card = 'go'
-        else:
-            temp_card = player.removeFromHand(choice)
+        if choice == 0:
+            return 0
+        temp_card = player.removeFromHand(choice, False)
         print()
         while temp_card.getValue() + self.peg_count > 31:
             choice = input('Exceeds 31 - choose another card: ')
-            temp_card = player.removeFromHand(choice)
+            if choice == 0:
+                print('Player says go')
+                return 0
+            temp_card = player.removeFromHand(choice, False)
             print()
-            if temp != 'go':
-                choice = player.removeFromHand(temp)
-            else:
-                choice = 'go'
-        return choice
+        temp_card = player.removeFromHand(choice, True)
+        return temp_card
 
     def cribCall(self):
         for i in range(len(self.players)):
-            for j in range(2):
+            for j in range(3):
                 print(self.players[i].getHand())
+                print()
                 if j == 0:
-                    self.players[i].removeFromHand(input('Choose a card to send to the crib: '))
+                    self.crib.append(self.players[i].removeFromHand(input('Choose a card to send to the crib: '), True))
+                    print()
+                elif j == 1:
+                    self.crib.append(self.players[i].removeFromHand(input('Choose another card to send to the crib: '), True))
                     print()
                 else:
-                    self.players[i].removeFromHand(input('Choose another card to send to the crib: '))
+                    print('Your current hand is: ')
+                    print(self.players[i].getHand())
+                    print()
                     print()
 
 class Points:
