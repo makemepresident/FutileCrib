@@ -7,15 +7,15 @@ class Card:
     # Could hold image information
 
     card_values = {
-        'J': 11,
-        'Q': 12,
-        'K': 13,
+        'J': 10,
+        'Q': 10,
+        'K': 10,
     }
 
     def __init__(self, suit, value):
         self.suit = suit
         if value == 0:
-            value == 1
+            value = 1
         if value < 11:
             self.value = value
         elif value == 11:
@@ -143,20 +143,25 @@ class GameHandler:
 
     def takeTurn(self, player):
         print(player.getHand())
-        choice = input('Choose a card: ')
+        choice = self.getChoice("Choose a card: ")
         if choice == 0:
             return 0
         temp_card = player.removeFromHand(choice, False)
         print()
         while temp_card.getValue() + self.peg_count > 31:
-            choice = input('Exceeds 31 - choose another card: ')
-            if choice == 0:
+            choice = self.getChoice('Exceeds 31 - choose another card: ')
+            if int(choice) == 0:
                 print('Player says go')
                 return 0
             temp_card = player.removeFromHand(choice, False)
             print()
         temp_card = player.removeFromHand(choice, True)
         return temp_card
+
+    def getChoice(self, prompt):
+        result = input(prompt)
+        return int(result)
+
 
     def cribCall(self):
         for i in range(len(self.players)):
