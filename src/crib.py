@@ -52,6 +52,7 @@ class Player:
         self.name = name
         self.hand = []
         self.position = 0
+        self.score = 0
 
     def changePosition(self, points):
         self.position += points
@@ -111,7 +112,7 @@ class GameHandler:
         while self.running:
             self.deck.shuffle()
             self.dealHands()
-            self.cribCall()
+            #self.cribCall()
             self.cut_card = self.deck.drawCard()
             self.peggingRound()
             # count now
@@ -120,12 +121,20 @@ class GameHandler:
     def peggingRound(self):
         while not self.players[0].handIsEmpty() and not self.players[1].handIsEmpty(): # Either player has cards
             for i in range(len(self.players)):
-                played = self.takeTurn(self.players[(self.dealer + i) % 2])
+                player_index = (self.dealer + i) % 2
+                played = self.takeTurn(self.players[player_index])
                 if played == 0:
                     self.peg_count = 0
+                    self.players[(player_index + 1) % 2].score += 1
                     continue
-                self.peg_count += played.getValue()
+                if played.getValue() + self.peg_count == 31:
+                    self.players[(player_index) % 2].score += 2
+                    self.peg_count = 0
+                    # add points to player
+                else:
+                    self.peg_count += played.getValue()
                 print('Current peg count: ' + str(self.peg_count))
+                print(self.players[0].name, self.players[0].score, self.players[1].name, self.players[1].score)
                 print()
 
     def dealHands(self):
@@ -142,7 +151,7 @@ class GameHandler:
         self.crib = []
 
     def takeTurn(self, player):
-        print(player.getHand())
+        print(player.name, player.getHand())
         choice = self.getChoice("Choose a card: ")
         if choice == 0:
             return 0
@@ -164,6 +173,7 @@ class GameHandler:
 
 
     def cribCall(self):
+        print("Calling crib.")
         for i in range(len(self.players)):
             for j in range(3):
                 print(self.players[i].getHand())
