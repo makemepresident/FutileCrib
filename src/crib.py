@@ -1,4 +1,6 @@
+# pylint: disable=unused-variable
 from random import random
+import random
 import math
 
 class Card:
@@ -7,6 +9,7 @@ class Card:
     # Could hold image information
 
     card_values = {
+        'A': 1,
         'J': 10,
         'Q': 10,
         'K': 10,
@@ -15,14 +18,14 @@ class Card:
     def __init__(self, suit, value):
         self.suit = suit
         if value == 0:
-            value = 1
-        if value < 11:
-            self.value = value
-        elif value == 11:
+            self.value = 'A'
+        if value < 10 and value > 0:
+            self.value = value + 1
+        elif value == 10:
             self.value = 'J'
-        elif value == 12:
+        elif value == 11:
             self.value = 'Q'
-        elif value == 13:
+        elif value == 12:
             self.value = 'K'
 
     def getValue(self):
@@ -37,11 +40,15 @@ class Deck:
         for i in range(52):
             self.cards.append(Card(self.suits[int(i / 13)], int(i % 13)))
 
-    def shuffle(self): # Needs implementation
+    def shuffle(self):
+        temp_cards = self.cards.copy()
+        self.cards = []
+        for i in range(52):
+            self.cards.append(temp_cards.pop(random.randint(0, 51 - i)))
         return
 
     def drawCard(self):
-        return self.cards.pop(math.floor(random() * 52) - (52 % len(self.cards)))
+        return self.cards.pop()
 
     def resetDeck(self):
         self.__init__()
@@ -112,7 +119,7 @@ class GameHandler:
         while self.running:
             self.deck.shuffle()
             self.dealHands()
-            #self.cribCall()
+            self.cribCall()
             self.cut_card = self.deck.drawCard()
             self.peggingRound()
             # count now
@@ -171,9 +178,8 @@ class GameHandler:
         result = input(prompt)
         return int(result)
 
-
     def cribCall(self):
-        print("Calling crib.")
+        print("\nCalling crib.")
         for i in range(len(self.players)):
             for j in range(3):
                 print(self.players[i].getHand())
