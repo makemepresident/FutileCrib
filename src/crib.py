@@ -7,12 +7,28 @@ class Card:
 
     # Could hold colour information
     # Could hold image information
-
+    
+    all_cards = 'A2345678910JQK'
     card_values = {
         'A': 1,
         'J': 10,
         'Q': 10,
         'K': 10,
+    }
+    card_ordering = {
+        'A': 1,
+        2: 2,
+        3: 3,
+        4: 4,
+        5: 5,
+        6: 6,
+        7: 7,
+        8: 8,
+        9: 9,
+        10: 10,
+        'J': 11,
+        'Q': 12,
+        'K': 13,
     }
 
     def __init__(self, suit, value):
@@ -126,15 +142,19 @@ class GameHandler:
             self.nextTurn()
 
     def peggingRound(self):
+        p = Points()
         while not self.players[0].handIsEmpty() and not self.players[1].handIsEmpty(): # Either player has cards
             for i in range(len(self.players)):
+                played_cards = []
                 player_index = (self.dealer + i) % 2
                 played = self.takeTurn(self.players[player_index])
                 if played == 0:
+                    played_cards = []
                     self.peg_count = 0
                     self.players[(player_index + 1) % 2].score += 1
                     continue
                 if played.getValue() + self.peg_count == 31:
+                    
                     self.players[(player_index) % 2].score += 2
                     self.peg_count = 0
                     # add points to player
@@ -198,7 +218,7 @@ class GameHandler:
 
 class Points:
 
-    def __init__(self, hand, cut_card):
+    def __init__(self, hand=None, cut_card=None):
         self.hands = [] # Contains every possible hand [1,2,3,4,5,6] --> [],[1],[2]...[1,2,3],[2,3,4],[2,3,5]... [1,2,3,4]
         self.cut = cut_card
         if hand is not None:
@@ -223,21 +243,45 @@ class Points:
         return fifteens * 2, runs, pairs * 2
 
     def checkRun(self, hand):
-        run = 0
-        for i in range(len(hand)):
-            temp = [hand[i] + j for j in range(1, len(hand))]
-            for j in range(len(temp)):
-                if temp[j] not in hand:
-                    break
-                if j == len(temp) - 1:
-                    # print(hand)
-                    if len(hand) > 3:
-                        run += len(hand) - 6
-                        if len(hand) == 5:
-                            run += 1
-                    else:
-                        run += 3
-        return run
+        # want: hand to be sorted according to Card.card_ordering
+        # use string Card.all_cards
+        # make power set of hand
+        # eliminate all 1- and 2-element sets
+        # start at 5-element set; turn into string and see if in all_cards
+        # repeat for the 4-element sets and 3-ones too
+        hand.sort(key=lambda card: Card.card_ordering[card])
+        powerset = list(filter(lambda subset: len(subset) > 2, self.powerset(hand)))
+        whole-hand = list(filter(lambda set: len(set) = 5, powerset))
+        four-hands = list(filter(lambda set: len(set) = 4, powerset))
+        three-hands = list(filter(lambda set: len(set) = 3, powerset))
+        
+        hand_string = toString(whole_hand)
+
+
+
+        # run = 0
+        # for i in range(len(hand)):
+        #     temp = [hand[i] + j for j in range(1, len(hand))]
+        #     for j in range(len(temp)):
+        #         if temp[j] not in hand:
+        #             break
+        #         if j == len(temp) - 1:
+        #             # print(hand)
+        #             if len(hand) > 3:
+        #                 run += len(hand) - 6
+        #                 if len(hand) == 5:
+        #                     run += 1
+        #             else:
+        #                 run += 3
+        # return run
+        pass
+
+    def toString(self, subset):
+        result = ''
+        for card in subset:
+            result.append(card)
+        return result
+
 
     def powerset(self, s):
         x = len(s)
@@ -245,5 +289,8 @@ class Points:
         for i in range(1 << x):
             yield [ss for mask, ss in zip(masks, s) if i & mask]
   
-g = GameHandler('Derik', 'Ryan')            
-g.gameLoop()
+# g = GameHandler('Derik', 'Ryan')            
+# g.gameLoop()
+
+p = Points()
+p.checkRun(['K', 3, 4, 'Q'])
