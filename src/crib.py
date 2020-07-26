@@ -138,8 +138,18 @@ class GameHandler:
             self.cribCall()
             self.cut_card = self.deck.drawCard()
             self.peggingRound()
+            self.countingRound()
             # count now
+            # make points object
+            # start at dealer index + 1 % 2
+            # count for dealer
+            # count for crib
             self.nextTurn()
+
+    def countingRound(self):
+        p = Points()
+        for i in range(len(self.players)):
+
 
     def peggingRound(self):
         p = Points()
@@ -251,9 +261,9 @@ class Points:
         # repeat for the 4-element sets and 3-ones too
         hand.sort(key=lambda card: Card.card_ordering[card])
         powerset = list(filter(lambda subset: len(subset) > 2, self.powerset(hand)))
-        whole-hand = list(filter(lambda set: len(set) = 5, powerset))
-        four-hands = list(filter(lambda set: len(set) = 4, powerset))
-        three-hands = list(filter(lambda set: len(set) = 3, powerset))
+        whole_hand = list(filter(lambda set: len(set) == 5, powerset))
+        four_hands = list(filter(lambda set: len(set) == 4, powerset))
+        three_hands = list(filter(lambda set: len(set) == 3, powerset))
         
         hand_string = toString(whole_hand)
 
@@ -279,7 +289,7 @@ class Points:
     def toString(self, subset):
         result = ''
         for card in subset:
-            result.append(card)
+            result += card
         return result
 
 
@@ -293,4 +303,7 @@ class Points:
 # g.gameLoop()
 
 p = Points()
-p.checkRun(['K', 3, 4, 'Q'])
+g = GameHandler('Derik', 'Zak')
+g.gameLoop()
+
+# p.checkRun(['K', 3, 4, 'Q'])
