@@ -1,4 +1,3 @@
-# pylint: disable=unused-variable
 from Deck import Deck
 from Player import Player
 from Points import Points
@@ -37,9 +36,9 @@ class GameHandler:
     def countingRound(self):
         p = Points()
         for i in range(len(self.players)):
-            player = self.players[(self.dealer + i) % 2] # start count at player opposing dealer
+            player = self.players[(dealer + i) % 2] # start count at player opposing dealer
             # player.score += p.getTotal(player.hand)
-        current_dealer = self.players[self.dealer]
+        current_dealer = players[dealer]
         # dealer score += p.getTotal(dealer.hand)        
 
     def peggingRound(self):
@@ -72,7 +71,7 @@ class GameHandler:
 
     def nextTurn(self):
         self.turn += 1
-        self.deck.resetDeck()
+        self.deck = Deck()
         self.cut_card = None
         self.peg_count = 0
         self.dealer = self.turn % len(self.players)
@@ -104,13 +103,18 @@ class GameHandler:
 
     def cribCall(self):
         print("\nCalling crib.")
-        print()
         for i in range(len(self.players)):
             for j in range(3):
                 print(self.players[i].getHand())
+                print()
                 if j == 0:
                     self.crib.append(self.players[i].removeFromHand(input('Choose a card to send to the crib: '), True))
+                    print()
                 elif j == 1:
                     self.crib.append(self.players[i].removeFromHand(input('Choose another card to send to the crib: '), True))
+                    print()
+                else:
                     print('Your current hand is: ')
-            print('\n')
+                    print(self.players[i].getHand())
+                    print()
+                    print()

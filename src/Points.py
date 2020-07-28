@@ -1,5 +1,3 @@
-from Card import Card
-
 class Points:
 
     def __init__(self, hand=None, cut_card=None):
@@ -49,7 +47,7 @@ class Points:
         four_hands = list(filter(lambda set: len(set) == 4, powerset))
         three_hands = list(filter(lambda set: len(set) == 3, powerset))
         
-        hand_string = self.toString(whole_hand)
+        hand_string = toString(whole_hand)
 
 
 
