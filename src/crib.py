@@ -1,5 +1,12 @@
+# pylint: disable=unused-variable
 from random import random
+import random
 import math
+from Player import Player
+from Card import Card
+from Deck import Deck
+from GameHandler import GameHandler
+from Points import Points
 
 class Card:
 
@@ -7,27 +14,28 @@ class Card:
     # Could hold image information
 
     card_values = {
-        'J': 11,
-        'Q': 12,
-        'K': 13,
+        'A': 1,
+        'J': 10,
+        'Q': 10,
+        'K': 10,
     }
 
     def __init__(self, suit, value):
         self.suit = suit
         if value == 0:
-            value == 1
-        if value < 11:
-            self.value = value
-        elif value == 11:
+            self.value = 'A'
+        if value < 10 and value > 0:
+            self.value = value + 1
+        elif value == 10:
             self.value = 'J'
-        elif value == 12:
+        elif value == 11:
             self.value = 'Q'
-        elif value == 13:
+        elif value == 12:
             self.value = 'K'
 
     def getValue(self):
         return self.value if self.value not in self.card_values else self.card_values.get(self.value)
-    
+
 class Deck:
 
     suits = ['Spades', 'Clubs', 'Hearts', 'Diamonds']
@@ -37,11 +45,15 @@ class Deck:
         for i in range(52):
             self.cards.append(Card(self.suits[int(i / 13)], int(i % 13)))
 
-    def shuffle(self): # Needs implementation
+    def shuffle(self):
+        temp_cards = self.cards.copy()
+        self.cards = []
+        for i in range(52):
+            self.cards.append(temp_cards.pop(random.randint(0, 51 - i)))
         return
 
     def drawCard(self):
-        return self.cards.pop(math.floor(random() * 52) - (52 % len(self.cards)))
+        return self.cards.pop()
 
     def resetDeck(self):
         self.__init__()
@@ -52,6 +64,7 @@ class Player:
         self.name = name
         self.hand = []
         self.position = 0
+        self.score = 0
 
     def changePosition(self, points):
         self.position += points
@@ -120,12 +133,20 @@ class GameHandler:
     def peggingRound(self):
         while not self.players[0].handIsEmpty() and not self.players[1].handIsEmpty(): # Either player has cards
             for i in range(len(self.players)):
-                played = self.takeTurn(self.players[(self.dealer + i) % 2])
+                player_index = (self.dealer + i) % 2
+                played = self.takeTurn(self.players[player_index])
                 if played == 0:
                     self.peg_count = 0
+                    self.players[(player_index + 1) % 2].score += 1
                     continue
-                self.peg_count += played.getValue()
+                if played.getValue() + self.peg_count == 31:
+                    self.players[(player_index) % 2].score += 2
+                    self.peg_count = 0
+                    # add points to player
+                else:
+                    self.peg_count += played.getValue()
                 print('Current peg count: ' + str(self.peg_count))
+                print(self.players[0].name, self.players[0].score, self.players[1].name, self.players[1].score)
                 print()
 
     def dealHands(self):
@@ -142,15 +163,15 @@ class GameHandler:
         self.crib = []
 
     def takeTurn(self, player):
-        print(player.getHand())
-        choice = input('Choose a card: ')
+        print(player.name, player.getHand())
+        choice = self.getChoice("Choose a card: ")
         if choice == 0:
             return 0
         temp_card = player.removeFromHand(choice, False)
         print()
         while temp_card.getValue() + self.peg_count > 31:
-            choice = input('Exceeds 31 - choose another card: ')
-            if choice == 0:
+            choice = self.getChoice('Exceeds 31 - choose another card: ')
+            if int(choice) == 0:
                 print('Player says go')
                 return 0
             temp_card = player.removeFromHand(choice, False)
@@ -158,7 +179,12 @@ class GameHandler:
         temp_card = player.removeFromHand(choice, True)
         return temp_card
 
+    def getChoice(self, prompt):
+        result = input(prompt)
+        return int(result)
+
     def cribCall(self):
+        print("\nCalling crib.")
         for i in range(len(self.players)):
             for j in range(3):
                 print(self.players[i].getHand())
@@ -223,6 +249,14 @@ class Points:
         masks = [1 << i for i in range(x)]
         for i in range(1 << x):
             yield [ss for mask, ss in zip(masks, s) if i & mask]
-  
-g = GameHandler('Derik', 'Ryan')            
+
+g = GameHandler('Derik', 'Ryan')
 g.gameLoop()
+# g = GameHandler('Derik', 'Ryan')
+# g.gameLoop()
+
+p = Points()
+g = GameHandler('Derik', 'Zak')
+g.gameLoop()
+
+# p.checkRun(['K', 3, 4, 'Q'])
