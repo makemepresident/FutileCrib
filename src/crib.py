@@ -2,6 +2,11 @@
 from random import random
 import random
 import math
+from Player import Player
+from Card import Card
+from Deck import Deck
+from GameHandler import GameHandler
+from Points import Points
 
 class Card:
 
@@ -30,7 +35,7 @@ class Card:
 
     def getValue(self):
         return self.value if self.value not in self.card_values else self.card_values.get(self.value)
-    
+
 class Deck:
 
     suits = ['Spades', 'Clubs', 'Hearts', 'Diamonds']
@@ -244,6 +249,14 @@ class Points:
         masks = [1 << i for i in range(x)]
         for i in range(1 << x):
             yield [ss for mask, ss in zip(masks, s) if i & mask]
-  
-g = GameHandler('Derik', 'Ryan')            
+
+g = GameHandler('Derik', 'Ryan')
 g.gameLoop()
+# g = GameHandler('Derik', 'Ryan')
+# g.gameLoop()
+
+p = Points()
+g = GameHandler('Derik', 'Zak')
+g.gameLoop()
+
+# p.checkRun(['K', 3, 4, 'Q'])
