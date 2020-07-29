@@ -1,5 +1,6 @@
 from Points import Points
 from GameHandler import GameHandler
+from Player import Player
 
 p = Points()
-p.countHand(['K', 5, 1, 1, 2])
+p.countHand(Player.generateHand())

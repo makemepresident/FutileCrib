@@ -1,4 +1,5 @@
 from Card import Card
+from Deck import Deck
 
 class Player:
 
@@ -10,6 +11,15 @@ class Player:
 
     def changePosition(self, points):
         self.position += points
+    
+    @staticmethod
+    def generateHand():
+        temp = []
+        deck = Deck()
+        deck.shuffle()
+        for i in range(6):
+            temp.append(deck.drawCard())
+        return temp
 
     def getHand(self):
         string_hand = []

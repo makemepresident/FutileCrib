@@ -19,20 +19,35 @@ class Points:
         return total
 
     def countHand(self, hand):
-        fifteens = 0
-        runs = 0
-        pairs = 0
-        if 11 or 12 or 13 in hand:
-            temp_hand = [x if x < 11 else 10 for x in hand]
-        temp_hand.append(self.cut.getValue())
-        for i in self.powerset(temp_hand):
-            if sum(i) == 15:
-                fifteens += 1
-            if len(i) == 2 and i[0] == i[1]:
-                pairs += 1
-            if len(i) >= 3:
-                runs += self.checkRun(i)
-        return fifteens * 2, runs, pairs * 2
+        # fifteens = 0
+        # runs = 0
+        # pairs = 0
+        # if 11 or 12 or 13 in hand:
+        #     temp_hand = [x if x < 11 else 10 for x in hand]
+        # temp_hand.append(self.cut.getValue())
+        # for i in self.powerset(temp_hand):
+        #     if sum(i) == 15:
+        #         fifteens += 1
+        #     if len(i) == 2 and i[0] == i[1]:
+        #         pairs += 1
+        #     if len(i) >= 3:
+        #         runs += self.checkRun(i)
+        # return fifteens * 2, runs, pairs * 2
+
+        #systemattically search for combinations that add to 15
+        # use powerset func to find such combs
+        # for each element in pweset, sum the elements
+
+        powerset = list(filter(lambda subset: len(subset) > 1, self.powerset(hand)))
+        sum = 0
+        points = 0
+        for combination in powerset:
+            for card in combination:
+                sum += card.getValue()
+            if sum == 15:
+                points += 2
+            sum = 0
+
 
     def checkRun(self, hand):
         # want: hand to be sorted according to Card.card_ordering
