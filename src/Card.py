@@ -3,13 +3,13 @@ class Card:
     # Could hold colour information
     # Could hold image information
     
-    all_cards = 'A2345678910JQK'
     card_values = {
         'A': 1,
         'J': 10,
         'Q': 10,
         'K': 10,
     }
+    
     card_ordering = {
         'A': 1,
         2: 2,
@@ -41,4 +41,7 @@ class Card:
 
     def getValue(self):
         return self.value if self.value not in self.card_values else self.card_values.get(self.value)
+    
+    def getFace(self):
+        return self.value
     

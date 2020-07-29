@@ -1,6 +1,9 @@
+from Card import Card
+
 class Points:
 
     def __init__(self, hand=None, cut_card=None):
+        self.all_cards = 'A2345678910JQK'
         self.hands = [] # Contains every possible hand [1,2,3,4,5,6] --> [],[1],[2]...[1,2,3],[2,3,4],[2,3,5]... [1,2,3,4]
         self.cut = cut_card
         if hand is not None:
@@ -14,30 +17,11 @@ class Points:
             return
         total = 0
         temp = self.hand.append(self.cut)
-        total += self.countHand(self.hand)
+        total += self.countFifteens(self.hand)
         total += self.checkRun(self.hand)
         return total
 
-    def countHand(self, hand):
-        # fifteens = 0
-        # runs = 0
-        # pairs = 0
-        # if 11 or 12 or 13 in hand:
-        #     temp_hand = [x if x < 11 else 10 for x in hand]
-        # temp_hand.append(self.cut.getValue())
-        # for i in self.powerset(temp_hand):
-        #     if sum(i) == 15:
-        #         fifteens += 1
-        #     if len(i) == 2 and i[0] == i[1]:
-        #         pairs += 1
-        #     if len(i) >= 3:
-        #         runs += self.checkRun(i)
-        # return fifteens * 2, runs, pairs * 2
-
-        #systemattically search for combinations that add to 15
-        # use powerset func to find such combs
-        # for each element in pweset, sum the elements
-
+    def countFifteens(self, hand):
         powerset = list(filter(lambda subset: len(subset) > 1, self.powerset(hand)))
         sum = 0
         points = 0
@@ -47,46 +31,33 @@ class Points:
             if sum == 15:
                 points += 2
             sum = 0
-
+        
 
     def checkRun(self, hand):
-        # want: hand to be sorted according to Card.card_ordering
-        # use string Card.all_cards
-        # make power set of hand
-        # eliminate all 1- and 2-element sets
-        # start at 5-element set; turn into string and see if in all_cards
-        # repeat for the 4-element sets and 3-ones too
-        hand.sort(key=lambda card: Card.card_ordering[card])
+        result = 0
+        hand.sort(key=lambda card: Card.card_ordering[card.getFace()])
         powerset = list(filter(lambda subset: len(subset) > 2, self.powerset(hand)))
-        whole_hand = list(filter(lambda set: len(set) == 5, powerset))
-        four_hands = list(filter(lambda set: len(set) == 4, powerset))
-        three_hands = list(filter(lambda set: len(set) == 3, powerset))
-        
-        hand_string = toString(whole_hand)
+        if self.toString(self.subset(powerset, 5)[0]) in self.all_cards:
+            return 5
+        for four_combo in self.subset(powerset, 4):
+            if self.toString(four_combo) in self.all_cards:
+                result += 4
+        if result > 0:
+            return result
+        for three_combo in self.subset(powerset, 3):
+            if self.toString(three_combo) in self.all_cards:
+                result += 3
+        return result
 
 
+    def subset(self, powerset, length):
+        return list(filter(lambda set: len(set) == length, powerset))
 
-        # run = 0
-        # for i in range(len(hand)):
-        #     temp = [hand[i] + j for j in range(1, len(hand))]
-        #     for j in range(len(temp)):
-        #         if temp[j] not in hand:
-        #             break
-        #         if j == len(temp) - 1:
-        #             # print(hand)
-        #             if len(hand) > 3:
-        #                 run += len(hand) - 6
-        #                 if len(hand) == 5:
-        #                     run += 1
-        #             else:
-        #                 run += 3
-        # return run
-        pass
 
     def toString(self, subset):
         result = ''
         for card in subset:
-            result += card
+            result += str(card.getFace())
         return result
 
 

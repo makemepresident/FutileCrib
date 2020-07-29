@@ -17,7 +17,7 @@ class Player:
         temp = []
         deck = Deck()
         deck.shuffle()
-        for i in range(6):
+        for i in range(5):
             temp.append(deck.drawCard())
         return temp
 
