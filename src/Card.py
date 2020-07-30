@@ -47,3 +47,12 @@ class Card:
     
     def getSuit(self):
         return self.suit
+
+    @staticmethod
+    def list2hand(l):
+        #[0,2,3,4,12]
+        # call card constructor with l[i] for each i and...... 
+        hand = []
+        for face in l:
+            hand.append(Card("Spades", face))
+        return hand

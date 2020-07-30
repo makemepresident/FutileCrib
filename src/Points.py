@@ -46,7 +46,8 @@ class Points:
 
     def checkRun(self, hand):
         result = 0
-        hand.sort(key=lambda card: Card.card_ordering[card.getFace()])
+        # WATCH OUT FOR THIS
+        hand = self.sortHand(hand)
         powerset = list(filter(lambda subset: len(subset) > 2, self.powerset(hand)))
         if self.toString(self.subset(powerset, 5)[0]) in self.all_cards:
             return 5
@@ -58,6 +59,31 @@ class Points:
         for three_combo in self.subset(powerset, 3):
             if self.toString(three_combo) in self.all_cards:
                 result += 3
+        return result
+
+    def checkPeggingRun(self, played_cards):
+        # given the last several cards played in pegging round, find runs
+        # check the last three played; if comprise a run score >= 3
+        # ie check if there's a run of four; if not return 3
+        # otherwise check for a run of five; if not return 4
+        # otherwise check for a run of six etc
+        # note played_cards is constant length
+        if played_cards == None:
+            return
+        result = 0
+        length = len(played_cards)
+        played_cards3 = played_cards[-3:]
+        played_cards4 = played_cards[-4:]
+        played_cards5 = played_cards[-5:]
+        played_cards3.sort(key=lambda card: Card.card_ordering[card.getFace()])
+        played_cards4.sort(key=lambda card: Card.card_ordering[card.getFace()])
+        played_cards5.sort(key=lambda card: Card.card_ordering[card.getFace()])
+        if length > 2 and self.toString(played_cards3) in self.all_cards:
+            result = 3
+            if length > 3 and self.toString(played_cards4) in self.all_cards:
+                result = 4
+                if length > 4 and self.toString(played_cards5) in self.all_cards:
+                    result = 5
         return result
 
 
@@ -77,3 +103,7 @@ class Points:
         masks = [1 << i for i in range(x)]
         for i in range(1 << x):
             yield [ss for mask, ss in zip(masks, s) if i & mask]
+
+    def sortHand(self, hand):
+        temp = hand.sort(key=lambda card: Card.card_ordering[card.getFace()])
+        return hand.sort(key=lambda card: Card.card_ordering[card.getFace()])
