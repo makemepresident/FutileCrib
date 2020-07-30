@@ -12,14 +12,25 @@ class Points:
                 if len(temp) == 4:
                     self.hands.append(temp)
 
-    def getTotal(self):
-        if self.hand is None:
+    def getTotal(self, hand, cut_card):
+        if hand is None:
             return
         total = 0
-        temp = self.hand.append(self.cut)
-        total += self.countFifteens(self.hand)
-        total += self.checkRun(self.hand)
+        hand.append(cut_card)
+        total += self.countFifteens(hand)
+        total += self.checkRun(hand)
+        total += self.countPairs(hand)
         return total
+
+
+    def countPairs(self, hand):
+        result = 0
+        pairs = list(filter(lambda subset: len(subset) == 2, self.powerset(hand)))
+        for pair in pairs:
+            if pair[0].getFace() == pair[1].getFace():
+                result += 2
+        return result
+
 
     def countFifteens(self, hand):
         powerset = list(filter(lambda subset: len(subset) > 1, self.powerset(hand)))
@@ -31,7 +42,7 @@ class Points:
             if sum == 15:
                 points += 2
             sum = 0
-        
+        return sum
 
     def checkRun(self, hand):
         result = 0

@@ -17,6 +17,7 @@ class GameHandler:
             self.dealer = self.turn % len(self.players)
             self.crib = []
             self.running = True
+            self.p = Points()
 
     def gameLoop(self):
         while self.running:
@@ -24,7 +25,7 @@ class GameHandler:
             self.dealHands()
             self.cribCall()
             self.cut_card = self.deck.drawCard()
-            self.peggingRound()
+            #self.peggingRound()
             self.countingRound()
             # count now
             # make points object
@@ -34,15 +35,16 @@ class GameHandler:
             self.nextTurn()
 
     def countingRound(self):
-        p = Points()
+        print("\nCounting round start, cut card = {} of {}".format(self.cut_card.getFace(), self.cut_card.getSuit()))
         for i in range(len(self.players)):
-            player = self.players[(dealer + i) % 2] # start count at player opposing dealer
-            # player.score += p.getTotal(player.hand)
-        current_dealer = players[dealer]
-        # dealer score += p.getTotal(dealer.hand)        
+            player = self.players[(self.dealer + i + 1) % 2] # start count at certain player s.t. dealer counts last
+            print("{}'s turn.".format(player.name))
+            player.score += self.p.getTotal(player.hand, self.cut_card)
+            print("{} scores {} points.".format(player.name, player.score))
+        current_dealer = self.players[self.dealer]
+        # dealer score += self.p.getTotal(dealer.hand)        
 
     def peggingRound(self):
-        p = Points()
         while not self.players[0].handIsEmpty() and not self.players[1].handIsEmpty(): # Either player has cards
             for i in range(len(self.players)):
                 played_cards = []
@@ -76,7 +78,9 @@ class GameHandler:
         self.peg_count = 0
         self.dealer = self.turn % len(self.players)
         self.crib = []
-        print('The ' + str(self.turn) + ' has ended')
+        for player in self.players:
+            player.resetHand()
+        print('Round ' + str(self.turn) + ' has ended.')
 
     def takeTurn(self, player):
         print(player.name, player.getHand())
@@ -102,7 +106,7 @@ class GameHandler:
         return int(result)
 
     def cribCall(self):
-        print("\nCalling crib.")
+        print("\nCalling {}'s crib.".format(self.players[self.dealer].name))
         for i in range(len(self.players)):
             for j in range(3):
                 print(self.players[i].getHand())

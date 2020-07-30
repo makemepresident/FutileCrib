@@ -45,3 +45,5 @@ class Card:
     def getFace(self):
         return self.value
     
+    def getSuit(self):
+        return self.suit
