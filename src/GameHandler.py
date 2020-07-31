@@ -8,6 +8,8 @@ class GameHandler:
         if hand1 != None or hand2 != None:
                 self.premadeHand = True
                 self.premade_hands = [hand1, hand2]
+        else:
+            self.premadeHand = False
         if type(player1) != str and type(player2) != str:
             print('Cannot initialize...')
             return
@@ -29,8 +31,10 @@ class GameHandler:
         while self.running:
             self.deck.shuffle()
             self.dealHands()
-            #self.cribCall()
+            self.cribCall()
             self.cut_card = self.deck.drawCard()
+            print("Cut card: {} of {}".format(self.cut_card.getFace(), self.cut_card.getSuit()))
+            # if cut card = J, add two points to dealer
             self.peggingRound()
             self.countingRound()
             # count now
@@ -51,7 +55,10 @@ class GameHandler:
         # dealer score += self.p.getTotal(dealer.hand)        
 
     def peggingRound(self):
+        print("Pegging round start.")
         played_cards = []
+        if self.cut_card.getFace() == 'J':
+            self.players[self.dealer].score += 2
         while not self.players[0].handIsEmpty() and not self.players[1].handIsEmpty(): # Either player has cards
             for i in range(len(self.players)):
                 player_index = (self.dealer + i) % 2
@@ -64,17 +71,19 @@ class GameHandler:
                 if played.getValue() + self.peg_count == 31:
                     self.players[(player_index) % 2].score += 2
                     self.peg_count = 0
-                    # add points to player
+                elif played.getValue() + self.peg_count == 15:
+                    self.players[(player_index) % 2].score += 2 + self.p.checkPeggingRun(played_cards)
+                    self.peg_count += played.getValue()
                 else:
                     self.peg_count += played.getValue()
-                    self.players[(player_index + 1) % 2].score += self.p.checkPeggingRun(played_cards)
+                    self.players[(player_index) % 2].score += self.p.checkPeggingRun(played_cards)
                 print('Current peg count: ' + str(self.peg_count))
                 print(self.players[0].name, self.players[0].score, self.players[1].name, self.players[1].score)
                 print()
 
     def dealHands(self):
         for p in range(2):
-            for i in range(4):
+            for i in range(6):
                 if self.premadeHand:
                     self.players[p].addToHand(self.premade_hands[p][i])
                 else:
@@ -118,6 +127,7 @@ class GameHandler:
         print("\nCalling {}'s crib.".format(self.players[self.dealer].name))
         for i in range(len(self.players)):
             for j in range(3):
+                print("{}'s hand:".format(self.players[i].name))
                 print(self.players[i].getHand())
                 print()
                 if j == 0:
@@ -127,7 +137,5 @@ class GameHandler:
                     self.crib.append(self.players[i].removeFromHand(input('Choose another card to send to the crib: '), True))
                     print()
                 else:
-                    print('Your current hand is: ')
-                    print(self.players[i].getHand())
                     print()
                     print()
