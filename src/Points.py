@@ -31,6 +31,21 @@ class Points:
                 result += 2
         return result
 
+    def countPeggingPairs(self, played_cards):
+        # take a look at only the last two cards
+        # if there's a pair, check for a triplet etc.    
+        result = 0
+        length = len(played_cards)
+        last_card = played_cards[-1]
+        if length > 1 and played_cards[-2] == last_card:
+            result = 2
+            if length > 2 and played_cards[-3] == last_card:
+                result += 2
+                if length > 3 and played_cards[-4] == last_card:
+                    result += 2
+        return result
+        pass
+
 
     def countFifteens(self, hand):
         powerset = list(filter(lambda subset: len(subset) > 1, self.powerset(hand)))
