@@ -57,6 +57,7 @@ class GameHandler:
     def peggingRound(self):
         print("Pegging round start.")
         played_cards = []
+        one_player_passed = False
         if self.cut_card.getFace() == 'J':
             self.players[self.dealer].score += 2
         while not self.players[0].handIsEmpty() and not self.players[1].handIsEmpty(): # Either player has cards
@@ -64,13 +65,20 @@ class GameHandler:
                 player_index = (self.dealer + i) % 2
                 played = self.takeTurn(self.players[player_index])
                 played_cards.append(played)
-                if played == 0:
-                    self.peg_count = 0
+                if played == 0 and not one_player_passed:
+                    one_player_passed = True
                     self.players[(player_index + 1) % 2].score += 1
                     continue
+                if one_player_passed and played == 0:
+                    self.players[(player_index) % 2].score += 1
+                    self.resetPeggingRound()
+                elif one_player_passed and played.getValue() + self.peg_count == 31:
+                    self.players[(player_index) % 2].score += 2 + self.p.checkPeggingRun(played_cards)
+                    self.resetPeggingRound()
+                
                 if played.getValue() + self.peg_count == 31:
                     self.players[(player_index) % 2].score += 2
-                    self.peg_count = 0
+                    self.resetPeggingRound()
                 elif played.getValue() + self.peg_count == 15:
                     self.players[(player_index) % 2].score += 2 + self.p.checkPeggingRun(played_cards)
                     self.peg_count += played.getValue()
@@ -80,6 +88,12 @@ class GameHandler:
                 print('Current peg count: ' + str(self.peg_count))
                 print(self.players[0].name, self.players[0].score, self.players[1].name, self.players[1].score)
                 print()
+
+    def resetPeggingRound(self):
+        self.peg_count = 0
+        self.played_cards = []
+        pass
+
 
     def dealHands(self):
         for p in range(2):
@@ -103,8 +117,9 @@ class GameHandler:
     def takeTurn(self, player):
         print(player.name, player.getHand())
         choice = self.getChoice("Choose a card: ")
-        if choice == 0:
-            return 0
+        if int(choice) == 0:
+                print('Player says go')
+                return 0
         temp_card = player.removeFromHand(choice, False)
         print()
         while temp_card.getValue() + self.peg_count > 31:
