@@ -23,7 +23,6 @@ class GameHandler:
             self.crib = []
             self.running = True
             self.p = Points()
-            self.one_player_passed = False
             
 
     
@@ -57,43 +56,78 @@ class GameHandler:
 
     def peggingRound(self):
         print("Pegging round start.")
+        p = Points()
+        player_to_go = (self.dealer + 1) % 2
+        player = self.players[player_to_go]
         played_cards = []
         if self.cut_card.getFace() == 'J':
             self.players[self.dealer].score += 2
-        while not self.players[0].handIsEmpty() and not self.players[1].handIsEmpty(): # Either player has cards
-            for i in range(len(self.players)):
-                player_index = (self.dealer + i) % 2
-                played = self.takeTurn(self.players[player_index])
-                played_cards.append(played)
-                if played == 0 and not self.one_player_passed:
-                    self.one_player_passed = True
-                    self.players[(player_index + 1) % 2].score += 1
-                    played_cards.pop(-1)
-                    continue
-                if self.one_player_passed and played == 0:
-                    self.players[(player_index) % 2].score += 1
+        
+        # start at player ahead of dealer self.dealer = 1 % no. of players
+        # check if player has cards; if so, can a card be played? if so, allow player to take turn, move on to next player
+        # guaranteed to occur at least once
+        # check if the player has cards; check if a card can be played; if yes to both, allow turn
+        # otherwise, assign player as passed; check if all players have passed;
+        # if so, award one point to current player and start new count
+        while(True):
+            if self.canPlay(player):
+                played_card = self.takeTurn(player)
+                played_cards.append(played_card)
+                self.peg_count += played_card.getValue()
+                player.score += p.checkPeggingRun(played_cards) + p.countPeggingPairs(played_cards)
+                if played_card.getValue() + self.peg_count == 15:
+                    player.score += 2
+                elif played_card.getValue() + self.peg_count == 31:
+                    player.score += 2
                     self.resetPeggingRound()
-                elif self.one_player_passed and played.getValue() + self.peg_count == 31:
-                    self.players[(player_index) % 2].score += 2 + self.p.checkPeggingRun(played_cards)
+            else:
+                print("{} says go.".format(player.name))
+                player.passed = True
+                if self.allPlayersPassed():
+                    player.score += 1
+                    print("Both players said go.")
                     self.resetPeggingRound()
-                
-                if played.getValue() + self.peg_count == 31:
-                    self.players[(player_index) % 2].score += 2
-                    self.resetPeggingRound()
-                elif played.getValue() + self.peg_count == 15:
-                    self.players[(player_index) % 2].score += 2 + self.p.checkPeggingRun(played_cards)
-                    self.peg_count += played.getValue()
-                else:
-                    self.peg_count += played.getValue()
-                    self.players[(player_index) % 2].score += self.p.checkPeggingRun(played_cards)
-                print('Current peg count: ' + str(self.peg_count))
-                print(self.players[0].name, self.players[0].score, self.players[1].name, self.players[1].score)
-                print()
+            print('Peg count: {}'.format(self.peg_count))
+            self.printScores()
+            player_to_go = (player_to_go + 1) % 2
+            player = self.players[player_to_go]
+            if self.noOneHasCards():
+                break
+
+
+    def noOneHasCards(self):
+        for player in self.players:
+            if len(player.hand) > 0:
+                return False
+        return True
+
+    def printScores(self):
+        for player in self.players:
+            print("{}: {}\t".format(player.name, player.score), end='')
+        print("\n")
+
+
+    def allPlayersPassed(self):
+        for player in self.players:
+            if not player.passed:
+                return False
+        return True
+    
+
+    def canPlay(self, player):
+        if len(player.hand) == 0 or player.passed:
+            return False
+        for card in player.hand:
+            if self.peg_count + card.getValue() < 31:
+                return True
+        return False
+
 
     def resetPeggingRound(self):
         self.peg_count = 0
         self.played_cards = []
-        self.one_player_passed = False
+        for player in self.players:
+            player.passed = False
         pass
 
 

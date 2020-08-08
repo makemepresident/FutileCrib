@@ -8,6 +8,7 @@ class Player:
         self.hand = []
         self.position = 0
         self.score = 0
+        self.passed = False
 
     def changePosition(self, points):
         self.position += points

@@ -44,8 +44,7 @@ class Points:
                 if length > 3 and played_cards[-4] == last_card:
                     result += 2
         return result
-        pass
-
+        
 
     def countFifteens(self, hand):
         powerset = list(filter(lambda subset: len(subset) > 1, self.powerset(hand)))
