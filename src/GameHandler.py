@@ -5,6 +5,7 @@ from Points import Points
 class GameHandler:
 
     def __init__(self, player1, player2, hand1=None, hand2 = None):
+        # pass whole player objects around and calculate Show points before pegging round
         if hand1 != None or hand2 != None:
                 self.premadeHand = True
                 self.premade_hands = [hand1, hand2]
@@ -33,6 +34,7 @@ class GameHandler:
             self.dealHands()
             self.cribCall()
             self.cut_card = self.deck.drawCard()
+            self.p = Points(self.players[0].hand, self.players[1].hand, self.cut_card)
             print("Cut card: {} of {}".format(self.cut_card.getFace(), self.cut_card.getSuit()))
             # if cut card = J, add two points to dealer
             self.peggingRound()
@@ -46,10 +48,13 @@ class GameHandler:
 
     def countingRound(self):
         print("\nCounting round start, cut card = {} of {}".format(self.cut_card.getFace(), self.cut_card.getSuit()))
+        if self.cut_card.getFace() == 'J':
+            self.players[self.dealer].score += 2
         for i in range(len(self.players)):
             player = self.players[(self.dealer + i + 1) % 2] # start count at certain player s.t. dealer counts last
             print("{}'s turn.".format(player.name))
-            player.score += self.p.getTotal(player.hand, self.cut_card)
+            for player in self.players:
+                self.p.getTotal(playerd)
             print("{} scores {} points.".format(player.name, player.score))
         current_dealer = self.players[self.dealer]
         # dealer score += self.p.getTotal(dealer.hand)        

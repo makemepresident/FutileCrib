@@ -2,24 +2,30 @@ from Card import Card
 
 class Points:
 
-    def __init__(self, hand=None, cut_card=None):
+    def __init__(self, hand=None, hand2=None, cut_card=None):
         self.all_cards = 'A2345678910JQK'
         self.hands = [] # Contains every possible hand [1,2,3,4,5,6] --> [],[1],[2]...[1,2,3],[2,3,4],[2,3,5]... [1,2,3,4]
         self.cut = cut_card
+        self.players_hands = [hand, hand2]
         if hand is not None:
             self.hand = hand
             for temp in self.powerset(hand):
                 if len(temp) == 4:
                     self.hands.append(temp)
 
-    def getTotal(self, hand, cut_card):
-        if hand is None:
-            return
-        total = 0
-        hand.append(cut_card)
-        total += self.countFifteens(hand)
-        total += self.checkRun(hand)
-        total += self.countPairs(hand)
+    def getTotal(self, player):
+        for hand in self.players_hands:
+            if hand is None:
+                return
+
+
+
+
+        # total = 0
+        # hand.append(cut_card)
+        # total += self.countFifteens(hand)
+        # total += self.checkRun(hand)
+        # total += self.countPairs(hand)
         return total
 
 
@@ -36,12 +42,12 @@ class Points:
         # if there's a pair, check for a triplet etc.    
         result = 0
         length = len(played_cards)
-        last_card = played_cards[-1]
-        if length > 1 and played_cards[-2] == last_card:
+        last_card = played_cards[-1].getFace()
+        if length > 1 and played_cards[-2].getFace() == last_card:
             result = 2
-            if length > 2 and played_cards[-3] == last_card:
+            if length > 2 and played_cards[-3].getFace() == last_card:
                 result += 2
-                if length > 3 and played_cards[-4] == last_card:
+                if length > 3 and played_cards[-4].getFace() == last_card:
                     result += 2
         return result
         
