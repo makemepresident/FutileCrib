@@ -4,31 +4,29 @@ from Points import Points
 
 class GameHandler:
 
-    def __init__(self, *args): #hand1=None, hand2=None
+    def __init__(self, player1, player2, hand1=None, hand2 = None):
         # pass whole player objects around and calculate Show points before pegging round
-        # if hand1 != None or hand2 != None:
-        #         self.premadeHand = True
-        #         self.premade_hands = [hand1, hand2]
-        # else:
-        self.premadeHand = False
-        for player_name in args:
-            wrong_number_of_players = (len(args) < 2 or len(args) > 4)
-            if type(player_name) != str or wrong_number_of_players:
-                print('Cannot initialize...')
-                return
+        if hand1 != None or hand2 != None:
+                self.premadeHand = True
+                self.premade_hands = [hand1, hand2]
+        else:
+            self.premadeHand = False
+        if type(player1) != str and type(player2) != str:
+            print('Cannot initialize...')
+            return
         else:
             self.turn = 0
             self.deck = Deck()
             self.cut_card = None
             self.peg_count = 0
-            self.players = []
-            for player_name in args:
-                self.players.append(Player(player_name))
+            self.players = [Player(player1), Player(player2)]
             self.dealer = self.turn % len(self.players)
             self.crib = []
             self.running = True
             self.p = Points()
-                
+            
+
+    
 
     def gameLoop(self):
         while self.running:
@@ -49,14 +47,14 @@ class GameHandler:
             self.nextTurn()
 
     def countingRound(self):
-        #print("\nCounting round start, cut card = {} of {}".format(self.cut_card.getFace(), self.cut_card.getSuit()))
+        print("\nCounting round start, cut card = {} of {}".format(self.cut_card.getFace(), self.cut_card.getSuit()))
         if self.cut_card.getFace() == 'J':
             self.players[self.dealer].score += 2
         for i in range(len(self.players)):
             player = self.players[(self.dealer + i + 1) % 2] # start count at certain player s.t. dealer counts last
             print("{}'s turn.".format(player.name))
             for player in self.players:
-                self.p.getTotal(player)
+                self.p.getTotal(playerd)
             print("{} scores {} points.".format(player.name, player.score))
         current_dealer = self.players[self.dealer]
         # dealer score += self.p.getTotal(dealer.hand)        
