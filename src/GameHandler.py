@@ -18,7 +18,8 @@ class GameHandler:
         self.players = []
         for player_name in args:
             self.players.append(Player(player_name))
-        self.dealer = self.turn % len(self.players)
+        self.no_of_players = len(self.players)
+        self.dealer = self.turn % self.no_of_players
         self.crib = []
         self.running = True
         self.p = Points()
@@ -41,11 +42,11 @@ class GameHandler:
         print("\nCounting round start, cut card = {} of {}".format(self.cut_card.getFace(), self.cut_card.getSuit()))
         if self.cut_card.getFace() == 'J':
             self.players[self.dealer].score += 2
-        for i in range(len(self.players)):
+        for i in range(self.no_of_players):
             player = self.players[(self.dealer + i + 1) % 2] # start count at certain player s.t. dealer counts last
             print("{}'s turn.".format(player.name))
             for player in self.players:
-                self.p.getTotal(playerd)
+                self.p.getTotal(player)
             print("{} scores {} points.".format(player.name, player.score))
         current_dealer = self.players[self.dealer]
         # dealer score += self.p.getTotal(dealer.hand)        
@@ -73,13 +74,14 @@ class GameHandler:
             else:
                 print("{} says go.".format(player.name))
                 player.passed = True
+                player_to_go += 1
                 if self.allPlayersPassed():
                     player.score += 1
                     print("Both players said go.")
                     self.resetPeggingRound()
             print('Peg count: {}'.format(self.peg_count))
             self.printScores()
-            player_to_go = (player_to_go + 1) % 2
+            player_to_go = (player_to_go + 1) % self.no_of_players
             player = self.players[player_to_go]
             if self.noOneHasCards():
                 break
@@ -123,11 +125,11 @@ class GameHandler:
 
 
     def dealHands(self):
-        if len(self.players) == 2:
+        if self.no_of_players == 2:
             hand_length = 6
         else:
             hand_length = 5
-        for p in range(len(self.players)):
+        for p in range(self.no_of_players):
             for i in range(hand_length):
                 self.players[p].addToHand(self.deck.drawCard())
 
@@ -137,7 +139,7 @@ class GameHandler:
         self.deck = Deck()
         self.cut_card = None
         self.peg_count = 0
-        self.dealer = self.turn % len(self.players)
+        self.dealer = self.turn % self.no_of_players
         self.crib = []
         for player in self.players:
             player.resetHand()
@@ -171,14 +173,14 @@ class GameHandler:
 
 
     def cribCall(self):
-        if len(self.players) == 2:
+        if self.no_of_players == 2:
             cards_to_give = 2
         else:
             cards_to_give = 1
-        if len(self.players) == 3:
+        if self.no_of_players == 3:
             self.crib.append(self.deck.drawCard())
         print("\nCalling {}'s crib.".format(self.players[self.dealer].name))
-        for i in range(len(self.players)):
+        for i in range(self.no_of_players):
             for j in range(cards_to_give):
                 print("{}'s hand:".format(self.players[i].name))
                 print(self.players[i].getHand())
