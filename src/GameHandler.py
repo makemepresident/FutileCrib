@@ -4,29 +4,25 @@ from Points import Points
 
 class GameHandler:
 
-    def __init__(self, player1, player2, hand1=None, hand2 = None):
-        # pass whole player objects around and calculate Show points before pegging round
-        if hand1 != None or hand2 != None:
-                self.premadeHand = True
-                self.premade_hands = [hand1, hand2]
-        else:
-            self.premadeHand = False
-        if type(player1) != str and type(player2) != str:
-            print('Cannot initialize...')
-            return
-        else:
-            self.turn = 0
-            self.deck = Deck()
-            self.cut_card = None
-            self.peg_count = 0
-            self.players = [Player(player1), Player(player2)]
-            self.dealer = self.turn % len(self.players)
-            self.crib = []
-            self.running = True
-            self.p = Points()
+    def __init__(self, *args): 
+        self.premadeHand = False
+        wrong_number_of_players = (len(args) < 2 or len(args) > 4)
+        for player_name in args:
+            if type(player_name) != str or wrong_number_of_players:
+                print('Cannot initialize... bad arguments or wrong number of players.')
+                return
+        self.turn = 0
+        self.deck = Deck()
+        self.cut_card = None
+        self.peg_count = 0
+        self.players = []
+        for player_name in args:
+            self.players.append(Player(player_name))
+        self.dealer = self.turn % len(self.players)
+        self.crib = []
+        self.running = True
+        self.p = Points()
             
-
-    
 
     def gameLoop(self):
         while self.running:
@@ -36,15 +32,10 @@ class GameHandler:
             self.cut_card = self.deck.drawCard()
             self.p = Points(self.players[0].hand, self.players[1].hand, self.cut_card)
             print("Cut card: {} of {}".format(self.cut_card.getFace(), self.cut_card.getSuit()))
-            # if cut card = J, add two points to dealer
             self.peggingRound()
             self.countingRound()
-            # count now
-            # make points object
-            # start at dealer index + 1 % 2
-            # count for dealer
-            # count for crib
             self.nextTurn()
+
 
     def countingRound(self):
         print("\nCounting round start, cut card = {} of {}".format(self.cut_card.getFace(), self.cut_card.getSuit()))
@@ -59,6 +50,7 @@ class GameHandler:
         current_dealer = self.players[self.dealer]
         # dealer score += self.p.getTotal(dealer.hand)        
 
+
     def peggingRound(self):
         print("Pegging round start.")
         p = Points()
@@ -67,13 +59,6 @@ class GameHandler:
         played_cards = []
         if self.cut_card.getFace() == 'J':
             self.players[self.dealer].score += 2
-        
-        # start at player ahead of dealer self.dealer = 1 % no. of players
-        # check if player has cards; if so, can a card be played? if so, allow player to take turn, move on to next player
-        # guaranteed to occur at least once
-        # check if the player has cards; check if a card can be played; if yes to both, allow turn
-        # otherwise, assign player as passed; check if all players have passed;
-        # if so, award one point to current player and start new count
         while(True):
             if self.canPlay(player):
                 played_card = self.takeTurn(player)
@@ -106,9 +91,10 @@ class GameHandler:
                 return False
         return True
 
+
     def printScores(self):
         for player in self.players:
-            print("{}: {}\t".format(player.name, player.score), end='')
+            print("{}: {}    ".format(player.name, player.score), end='')
         print("\n")
 
 
@@ -137,12 +123,14 @@ class GameHandler:
 
 
     def dealHands(self):
-        for p in range(2):
-            for i in range(6):
-                if self.premadeHand:
-                    self.players[p].addToHand(self.premade_hands[p][i])
-                else:
-                    self.players[p].addToHand(self.deck.drawCard())
+        if len(self.players) == 2:
+            hand_length = 6
+        else:
+            hand_length = 5
+        for p in range(len(self.players)):
+            for i in range(hand_length):
+                self.players[p].addToHand(self.deck.drawCard())
+
 
     def nextTurn(self):
         self.turn += 1
@@ -154,6 +142,7 @@ class GameHandler:
         for player in self.players:
             player.resetHand()
         print('Round ' + str(self.turn) + ' has ended.')
+
 
     def takeTurn(self, player):
         print(player.name, player.getHand())
@@ -173,25 +162,27 @@ class GameHandler:
         temp_card = player.removeFromHand(choice, True)
         return temp_card
 
+
     def getChoice(self, prompt):
         result = input(prompt)
         while result == '':
             result = input('Invalid string, try again: ')
         return int(result)
 
+
     def cribCall(self):
+        if len(self.players) == 2:
+            cards_to_give = 2
+        else:
+            cards_to_give = 1
+        if len(self.players) == 3:
+            self.crib.append(self.deck.drawCard())
         print("\nCalling {}'s crib.".format(self.players[self.dealer].name))
         for i in range(len(self.players)):
-            for j in range(3):
+            for j in range(cards_to_give):
                 print("{}'s hand:".format(self.players[i].name))
                 print(self.players[i].getHand())
                 print()
-                if j == 0:
-                    self.crib.append(self.players[i].removeFromHand(input('Choose a card to send to the crib: '), True))
-                    print()
-                elif j == 1:
-                    self.crib.append(self.players[i].removeFromHand(input('Choose another card to send to the crib: '), True))
-                    print()
-                else:
-                    print()
-                    print()
+                self.crib.append(self.players[i].removeFromHand(input('Choose a card to send to the crib: '), True))
+                print("\n")
+
