@@ -2,30 +2,27 @@ from Card import Card
 
 class Points:
 
-    def __init__(self, hand=None, hand2=None, cut_card=None):
+    def __init__(self, cut_card=None):
         self.all_cards = 'A2345678910JQK'
-        self.hands = [] # Contains every possible hand [1,2,3,4,5,6] --> [],[1],[2]...[1,2,3],[2,3,4],[2,3,5]... [1,2,3,4]
+        # self.hands = [] # Contains every possible hand [1,2,3,4,5,6] --> [],[1],[2]...[1,2,3],[2,3,4],[2,3,5]... [1,2,3,4]
         self.cut = cut_card
-        self.players_hands = [hand, hand2]
-        if hand is not None:
-            self.hand = hand
-            for temp in self.powerset(hand):
-                if len(temp) == 4:
-                    self.hands.append(temp)
+        #
+        # if hand is not None:
+        #     self.hand = hand
+        #     for temp in self.powerset(hand):
+        #         if len(temp) == 4:
+        #             self.hands.append(temp)
+        # I don't see a reason for all the code in here any longer.
+        pass
 
     def getTotal(self, player):
-        for hand in self.players_hands:
-            if hand is None:
-                return
-
-
-
-
-        # total = 0
-        # hand.append(cut_card)
-        # total += self.countFifteens(hand)
-        # total += self.checkRun(hand)
-        # total += self.countPairs(hand)
+        if player.hand is None:
+            return 0
+        total = 0
+        player.hand.append(self.cut)
+        total += self.countFifteens(player.hand)
+        total += self.checkRun(player.hand)
+        total += self.countPairs(player.hand)
         return total
 
 
@@ -62,7 +59,7 @@ class Points:
             if sum == 15:
                 points += 2
             sum = 0
-        return sum
+        return points
 
     def checkRun(self, hand):
         result = 0
@@ -82,29 +79,35 @@ class Points:
         return result
 
     def checkPeggingRun(self, played_cards):
-        # given the last several cards played in pegging round, find runs
-        # check the last three played; if comprise a run score >= 3
-        # ie check if there's a run of four; if not return 3
-        # otherwise check for a run of five; if not return 4
-        # otherwise check for a run of six etc
-        # note played_cards is constant length
         if played_cards == None:
-            return
+            return 0
         result = 0
         length = len(played_cards)
-        played_cards3 = played_cards[-3:]
-        played_cards4 = played_cards[-4:]
-        played_cards5 = played_cards[-5:]
-        played_cards3.sort(key=lambda card: Card.card_ordering[card.getFace()])
-        played_cards4.sort(key=lambda card: Card.card_ordering[card.getFace()])
-        played_cards5.sort(key=lambda card: Card.card_ordering[card.getFace()])
-        if length > 2 and self.toString(played_cards3) in self.all_cards:
-            result = 3
-            if length > 3 and self.toString(played_cards4) in self.all_cards:
-                result = 4
-                if length > 4 and self.toString(played_cards5) in self.all_cards:
-                    result = 5
+        if length < 3: 
+            return 0
+        for i in range(3, (length + 1)): 
+            subset = played_cards[-i:]
+            subset.sort(key=lambda card: Card.card_ordering[card.getFace()])
+            if self.toString(subset) in self.all_cards:
+                result = length
+            else:
+                break
         return result
+            
+
+        # played_cards3 = played_cards[-3:]  # this
+        # played_cards4 = played_cards[-4:]
+        # played_cards5 = played_cards[-5:]
+        # played_cards3.sort(key=lambda card: Card.card_ordering[card.getFace()]) # then this
+        # played_cards4.sort(key=lambda card: Card.card_ordering[card.getFace()])
+        # played_cards5.sort(key=lambda card: Card.card_ordering[card.getFace()])
+        # if length > 2 and self.toString(played_cards3) in self.all_cards:
+        #     result = 3 # then the appropriate one of these...
+        #     if length > 3 and self.toString(played_cards4) in self.all_cards:
+        #         result = 4
+        #         if length > 4 and self.toString(played_cards5) in self.all_cards:
+        #             result = 5
+        # return result
 
 
     def subset(self, powerset, length):

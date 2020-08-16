@@ -22,7 +22,6 @@ class GameHandler:
         self.dealer = self.turn % self.no_of_players
         self.crib = []
         self.running = True
-        self.p = Points()
             
 
     def gameLoop(self):
@@ -31,10 +30,10 @@ class GameHandler:
             self.dealHands()
             self.cribCall()
             self.cut_card = self.deck.drawCard()
-            self.p = Points(self.players[0].hand, self.players[1].hand, self.cut_card)
+            self.p = Points(self.cut_card)
             print("Cut card: {} of {}".format(self.cut_card.getFace(), self.cut_card.getSuit()))
-            self.peggingRound()
             self.countingRound()
+            self.peggingRound()
             self.nextTurn()
 
 
