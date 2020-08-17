@@ -64,7 +64,7 @@ class Points:
     def checkRun(self, hand):
         result = 0
         # WATCH OUT FOR THIS
-        hand = self.sortHand(hand)
+        hand.sort(key=lambda card: Card.card_ordering[card.getFace()])
         powerset = list(filter(lambda subset: len(subset) > 2, self.powerset(hand)))
         if self.toString(self.subset(powerset, 5)[0]) in self.all_cards:
             return 5
@@ -127,6 +127,3 @@ class Points:
         for i in range(1 << x):
             yield [ss for mask, ss in zip(masks, s) if i & mask]
 
-    def sortHand(self, hand):
-        temp = hand.sort(key=lambda card: Card.card_ordering[card.getFace()])
-        return hand.sort(key=lambda card: Card.card_ordering[card.getFace()])
