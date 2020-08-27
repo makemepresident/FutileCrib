@@ -23,6 +23,7 @@ class Points:
         total += self.countFifteens(player.hand)
         total += self.checkRun(player.hand)
         total += self.countPairs(player.hand)
+        player.hand.remove(self.cut)
         return total
 
 

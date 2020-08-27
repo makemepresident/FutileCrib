@@ -16,13 +16,15 @@ class GameHandler:
         self.cut_card = None
         self.peg_count = 0
         self.players = []
+        self.score_cache = []
         for player_name in args:
             self.players.append(Player(player_name))
+            self.score_cache.append(0)
         self.no_of_players = len(self.players)
         self.dealer = self.turn % self.no_of_players
         self.crib = []
         self.running = True
-            
+
 
     def gameLoop(self):
         while self.running:
@@ -34,21 +36,25 @@ class GameHandler:
             print("Cut card: {} of {}".format(self.cut_card.getFace(), self.cut_card.getSuit()))
             self.countingRound()
             self.peggingRound()
+            self.peggingRoundEndMessage()
             self.nextTurn()
 
 
-    def countingRound(self):
+    def peggingRoundEndMessage(self):
         print("\nCounting round start, cut card = {} of {}".format(self.cut_card.getFace(), self.cut_card.getSuit()))
+        for i in range(self.no_of_players):
+            print("{}'s hand {} was worth {} points".format(self.players[i].name, self.players[i].getHand(), self.score_cache[i]))
+            self.players[i].score += self.score_cache[i]
+            self.score_cache[i] = 0
+
+
+    def countingRound(self):
+        player_to_go = self.dealer + 1
         if self.cut_card.getFace() == 'J':
             self.players[self.dealer].score += 2
         for i in range(self.no_of_players):
-            player = self.players[(self.dealer + i + 1) % 2] # start count at certain player s.t. dealer counts last
-            print("{}'s turn.".format(player.name))
-            for player in self.players:
-                self.p.getTotal(player)
-            print("{} scores {} points.".format(player.name, player.score))
-        current_dealer = self.players[self.dealer]
-        # dealer score += self.p.getTotal(dealer.hand)        
+            player = self.players[(player_to_go + i) % self.no_of_players] # start count at certain player s.t. dealer counts last
+            self.score_cache[(player_to_go + i) % self.no_of_players] = self.p.getTotal(player)
 
 
     def peggingRound(self):
@@ -142,7 +148,7 @@ class GameHandler:
         self.crib = []
         for player in self.players:
             player.resetHand()
-        print('Round ' + str(self.turn) + ' has ended.')
+        print('\nRound ' + str(self.turn) + ' has ended.')
 
 
     def takeTurn(self, player):
