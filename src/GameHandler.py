@@ -30,8 +30,8 @@ class GameHandler:
         while self.running:
             self.deck.shuffle()
             self.dealHands()
-            self.cribCall()
             self.cut_card = self.deck.drawCard()
+            self.cribCall()
             self.p = Points(self.cut_card)
             print("Cut card: {} of {}".format(self.cut_card.getFace(), self.cut_card.getSuit()))
             self.countingRound()
@@ -42,10 +42,16 @@ class GameHandler:
 
     def peggingRoundEndMessage(self):
         print("\nCounting round start, cut card = {} of {}".format(self.cut_card.getFace(), self.cut_card.getSuit()))
-        for i in range(self.no_of_players):
-            print("{}'s hand {} was worth {} points".format(self.players[i].name, self.players[i].getHand(), self.score_cache[i]))
+        crib_points = self.p.countPairs(self.crib) + self.p.checkRun(self.crib)
+        self.players[self.dealer].score += crib_points
+        for i in range(self.dealer + 1, self.dealer + self.no_of_players + 1, 1):
+            i = i % self.no_of_players
+            # here's where end-of-game handling should be (121 points)
+            # for it would be where who-starts-counting-first is taken care of
+            print("{}'s hand was worth {} points".format(self.players[i].name, self.score_cache[i]))
             self.players[i].score += self.score_cache[i]
             self.score_cache[i] = 0
+        print("{}'s crib was worth {} points".format(self.players[self.dealer].name, crib_points))
 
 
     def countingRound(self):
@@ -55,6 +61,7 @@ class GameHandler:
         for i in range(self.no_of_players):
             player = self.players[(player_to_go + i) % self.no_of_players] # start count at certain player s.t. dealer counts last
             self.score_cache[(player_to_go + i) % self.no_of_players] = self.p.getTotal(player)
+        self.score_cache[self.dealer] += self.p.countPairs(self.crib) + self.p.checkRun(self.crib)
 
 
     def peggingRound(self):
@@ -79,7 +86,7 @@ class GameHandler:
             else:
                 print("{} says go.".format(player.name))
                 player.passed = True
-                player_to_go += 1
+                player_to_go = (player_to_go + 1) % self.no_of_players
                 if self.allPlayersPassed():
                     player.score += 1
                     print("Both players said go.")
@@ -116,7 +123,7 @@ class GameHandler:
         if len(player.hand) == 0 or player.passed:
             return False
         for card in player.hand:
-            if self.peg_count + card.getValue() < 31:
+            if self.peg_count + card.getValue() <= 31:
                 return True
         return False
 
@@ -192,4 +199,4 @@ class GameHandler:
                 print()
                 self.crib.append(self.players[i].removeFromHand(input('Choose a card to send to the crib: '), True))
                 print("\n")
-
+        self.crib.append(self.cut_card)
