@@ -15,6 +15,7 @@ class Points:
         # I don't see a reason for all the code in here any longer.
         pass
 
+
     def getTotal(self, player):
         if player.hand is None:
             return 0
@@ -35,18 +36,24 @@ class Points:
                 result += 2
         return result
 
+
     def countPeggingPairs(self, played_cards):
         # take a look at only the last two cards
-        # if there's a pair, check for a triplet etc.    
+        # if there's a pair, check for a triplet etc.
+        n_tuple = "pair"
         result = 0
         length = len(played_cards)
         last_card = played_cards[-1].getFace()
         if length > 1 and played_cards[-2].getFace() == last_card:
             result = 2
             if length > 2 and played_cards[-3].getFace() == last_card:
-                result += 2
+                result = 6
+                n_tuple = 'triplet'
                 if length > 3 and played_cards[-4].getFace() == last_card:
-                    result += 2
+                    result = 12
+                    n_tuple = 'quartet'
+        if result > 0:
+            print("A {} for {}.".format(n_tuple, result))
         return result
         
 
@@ -61,6 +68,7 @@ class Points:
                 points += 2
             sum = 0
         return points
+
 
     def checkRun(self, hand):
         result = 0
@@ -79,6 +87,7 @@ class Points:
                 result += 3
         return result
 
+
     def checkPeggingRun(self, played_cards):
         if played_cards == None:
             return 0
@@ -91,24 +100,9 @@ class Points:
             subset.sort(key=lambda card: Card.card_ordering[card.getFace()])
             if self.toString(subset) in self.all_cards:
                 result = length
-            else:
-                break
+        if result > 0:
+            print("A run is {}.".format(result))
         return result
-            
-
-        # played_cards3 = played_cards[-3:]  # this
-        # played_cards4 = played_cards[-4:]
-        # played_cards5 = played_cards[-5:]
-        # played_cards3.sort(key=lambda card: Card.card_ordering[card.getFace()]) # then this
-        # played_cards4.sort(key=lambda card: Card.card_ordering[card.getFace()])
-        # played_cards5.sort(key=lambda card: Card.card_ordering[card.getFace()])
-        # if length > 2 and self.toString(played_cards3) in self.all_cards:
-        #     result = 3 # then the appropriate one of these...
-        #     if length > 3 and self.toString(played_cards4) in self.all_cards:
-        #         result = 4
-        #         if length > 4 and self.toString(played_cards5) in self.all_cards:
-        #             result = 5
-        # return result
 
 
     def subset(self, powerset, length):

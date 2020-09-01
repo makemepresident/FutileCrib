@@ -78,9 +78,11 @@ class GameHandler:
                 played_cards.append(played_card)
                 self.peg_count += played_card.getValue()
                 player.score += p.checkPeggingRun(played_cards) + p.countPeggingPairs(played_cards)
-                if played_card.getValue() + self.peg_count == 15:
+                if self.peg_count == 15:
+                    print("Fifteen for 2.")
                     player.score += 2
-                elif played_card.getValue() + self.peg_count == 31:
+                elif self.peg_count == 31:
+                    print("Thirty-one for 2")
                     player.score += 2
                     self.resetPeggingRound()
             else:
