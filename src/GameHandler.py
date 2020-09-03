@@ -24,6 +24,7 @@ class GameHandler:
         self.dealer = self.turn % self.no_of_players
         self.crib = []
         self.running = True
+        self.someoneWon = False
 
 
     def gameLoop(self):
@@ -35,10 +36,20 @@ class GameHandler:
             self.p = Points(self.cut_card)
             print("Cut card: {} of {}".format(self.cut_card.getFace(), self.cut_card.getSuit()))
             self.countingRound()
+            if self.someoneWon:
+                break
             self.peggingRound()
+            if self.someoneWon:
+                break
             self.peggingRoundEndMessage()
+            if self.someoneWon:
+                break
             self.nextTurn()
-
+        for player in self.players:
+            if player.score > 120:
+                print('{} scored {} points. Congratulations!'
+                        .format(player.name, player.score))
+       
 
     def peggingRoundEndMessage(self):
         print("\nCounting round start, cut card = {} of {}".format(self.cut_card.getFace(), self.cut_card.getSuit()))
@@ -51,8 +62,11 @@ class GameHandler:
             print("{}'s hand was worth {} points".format(self.players[i].name, self.score_cache[i]))
             self.players[i].score += self.score_cache[i]
             self.score_cache[i] = 0
+            if self.players[i].score > 120:
+                self.someoneWon = True
+                break
         print("{}'s crib was worth {} points".format(self.players[self.dealer].name, crib_points))
-
+        
 
     def countingRound(self):
         player_to_go = self.dealer + 1
@@ -95,11 +109,15 @@ class GameHandler:
                     self.resetPeggingRound()
             print('Peg count: {}'.format(self.peg_count))
             self.printScores()
+            #########################
+            if player.score > 120:
+                self.someoneWon = True
+                break
             player_to_go = (player_to_go + 1) % self.no_of_players
             player = self.players[player_to_go]
             if self.noOneHasCards():
                 break
-
+            
 
     def noOneHasCards(self):
         for player in self.players:
