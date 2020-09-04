@@ -23,6 +23,7 @@ class GameHandler:
         self.no_of_players = len(self.players)
         self.dealer = self.turn % self.no_of_players
         self.crib = []
+        self.played_cards = []
         self.running = True
         self.someoneWon = False
 
@@ -81,17 +82,17 @@ class GameHandler:
     def peggingRound(self):
         print("Pegging round start.")
         p = Points()
-        player_to_go = (self.dealer + 1) % 2
+        player_to_go = (self.dealer + 1) % self.no_of_players 
         player = self.players[player_to_go]
-        played_cards = []
+        self.played_cards = []
         if self.cut_card.getFace() == 'J':
             self.players[self.dealer].score += 2
         while(True):
             if self.canPlay(player):
                 played_card = self.takeTurn(player)
-                played_cards.append(played_card)
+                self.played_cards.append(played_card)
                 self.peg_count += played_card.getValue()
-                player.score += p.checkPeggingRun(played_cards) + p.countPeggingPairs(played_cards)
+                player.score += p.checkPeggingRun(self.played_cards) + p.countPeggingPairs(self.played_cards)
                 if self.peg_count == 15:
                     print("Fifteen for 2.")
                     player.score += 2
@@ -109,13 +110,13 @@ class GameHandler:
                     self.resetPeggingRound()
             print('Peg count: {}'.format(self.peg_count))
             self.printScores()
-            #########################
             if player.score > 120:
                 self.someoneWon = True
                 break
             player_to_go = (player_to_go + 1) % self.no_of_players
             player = self.players[player_to_go]
             if self.noOneHasCards():
+                self.resetPeggingRound()
                 break
             
 
@@ -153,7 +154,6 @@ class GameHandler:
         self.played_cards = []
         for player in self.players:
             player.passed = False
-        pass
 
 
     def dealHands(self):
